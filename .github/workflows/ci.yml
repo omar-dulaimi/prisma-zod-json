@@ -107,7 +107,7 @@ jobs:
         working-directory: e2e/fixture
         run: pnpm check
 
-      - name: Negative control — the check must fail when validation is off
+      - name: Negative control, the check must fail when validation is off
         working-directory: e2e/fixture
         # A test that cannot fail proves nothing. Disabling write validation has to break it.
         run: |
@@ -116,7 +116,7 @@ jobs:
           pnpm emit >/dev/null
           pnpm db:init >/dev/null
           if pnpm check >/dev/null 2>&1; then
-            echo "::error::The e2e check passed with write validation disabled — it is not testing what it claims."
+            echo "::error::The e2e check passed with write validation disabled, so it is not testing what it claims."
             exit 1
           fi
           echo "Negative control behaved correctly: the check fails when validation is off."

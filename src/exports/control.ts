@@ -1,7 +1,7 @@
 /**
  * Control-plane extension descriptor for zod-json.
  *
- * There is nothing to install — `jsonb` is a built-in Postgres type — and the schema in typeParams
+ * There is nothing to install, `jsonb` is a built-in Postgres type, and the schema in typeParams
  * affects runtime validation only, never DDL. So the sole control hook is an identity
  * `expandNativeType`. Lives at the control entrypoint so `src/core/**` stays free of migration-plane
  * imports.

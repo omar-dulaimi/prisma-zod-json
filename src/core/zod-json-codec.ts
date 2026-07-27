@@ -3,7 +3,7 @@
  *
  * The schema is serialised to JSON Schema when the column is authored, rides into the contract as
  * type params, and is rebuilt into a validator at runtime. Values are validated on the way in as well
- * as on the way out — see {@link ZodJsonCodecClass.encode}.
+ * as on the way out; see {@link ZodJsonCodecClass.encode}.
  */
 import type { JsonValue } from '@prisma-next/contract/types';
 import {
@@ -38,7 +38,7 @@ const ZOD_JSON_META = { db: { sql: { postgres: { nativeType: ZOD_JSON_NATIVE_TYP
  *
  * The opt-out is a present-and-truthy `'off'` rather than `validateOnWrite: false`, because the
  * contract emitter drops boolean `false` (see `serialize.ts`). Encoded this way, a marker lost in
- * transit means validation stays **on** — the safe direction.
+ * transit means validation stays **on**: the safe direction.
  */
 export type ZodJsonParams = ZodJsonTypeParams & {
   readonly writeValidation?: 'off' | undefined;
@@ -85,7 +85,7 @@ function fail(phase: 'encode' | 'decode', error: z.ZodError): never {
   throw runtimeError(
     'RUNTIME.JSON_SCHEMA_VALIDATION_FAILED',
     `zod/json schema validation failed (${phase})${at}: ${issues
-      .map((i) => `${i.path.join('.') || '(root)'} — ${i.message}`)
+      .map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`)
       .join('; ')}`,
     { codecId: ZOD_JSON_CODEC_ID, phase, issues },
   );
@@ -197,12 +197,12 @@ export interface ZodJsonColumnOptions extends SerializeOptions {
  * Declares a JSON column whose contents are enforced by `schema`.
  *
  * Serialises eagerly so an unrepresentable constraint fails while authoring the schema, and keeps the
- * schema's inferred type at the column site — the runtime factory cannot, since it only ever sees the
+ * schema's inferred type at the column site: the runtime factory cannot, since it only ever sees the
  * serialised params.
  *
  * Validation runs against the *rehydrated* schema, not the one passed in, even though the original is
  * right here in scope. The runtime only ever has what the contract carried, so validating against the
- * original would make a column enforce more in development than in production — which under
+ * original would make a column enforce more in development than in production, which under
  * `allowUnrepresentable` it silently would. One schema, one behaviour, both paths.
  *
  * @throws {Error} if the schema uses a construct JSON Schema cannot carry. See `representability.ts`.

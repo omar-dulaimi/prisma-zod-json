@@ -7,7 +7,7 @@ import { findUnrepresentable } from '../src/core/representability.js';
  * against actual behaviour rather than against the detector's own idea of it, so a construct zod
  * starts dropping in a future version fails here instead of shipping.
  *
- * Fidelity means same verdict AND same parsed output — `.trim()` keeps accepting `"  x  "` after a
+ * Fidelity means same verdict AND same parsed output, `.trim()` keeps accepting `"  x  "` after a
  * round-trip while quietly no longer trimming it.
  */
 const probes: unknown[] = [
@@ -62,7 +62,7 @@ const corpus: [name: string, schema: z.ZodType][] = [
   ['enum', z.enum(['a', 'b'])],
   ['nullable', z.string().nullable()],
   // Strict objects, because plain `z.object()` strips unknown keys and JSON Schema cannot say
-  // "strip" — see the unknown-keys suite below. Everything else about objects is faithful.
+  // "strip"; see the unknown-keys suite below. Everything else about objects is faithful.
   ['optional in object', z.strictObject({ a: z.string().optional() })],
   ['default in object', z.strictObject({ a: z.string().default('d') })],
   ['strict object', z.strictObject({ a: z.string() })],
@@ -105,7 +105,7 @@ describe('when the detector is silent, the round-trip is faithful', () => {
  *
  * We accept that rather than refuse the most common construct in the language: it turns silent data
  * loss into a loud error at the write boundary, which is the safe direction. `.trim()` is the
- * opposite — silently keeping unnormalised data — and is refused.
+ * opposite: silently keeping unnormalised data, and is refused.
  */
 describe('unknown keys on a plain z.object become rejected rather than stripped', () => {
   const plain = z.object({ a: z.string() });

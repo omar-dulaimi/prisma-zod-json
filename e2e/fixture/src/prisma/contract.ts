@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 /**
  * Deliberately nests, so the write-validation assertions can check that a failure names its path at
- * more than one depth — `notifications.digestHour`, not just `notifications`.
+ * more than one depth, `notifications.digestHour`, not just `notifications`.
  */
 const Settings = z.object({
   theme: z.enum(['light', 'dark']),
@@ -20,7 +20,7 @@ const Settings = z.object({
 export const contract = defineContract(
   {},
   ({ field, model }) => ({
-    // Registration 1 of 3 — the contract plane. Belongs in the object this callback returns;
+    // Registration 1 of 3: the contract plane. Belongs in the object this callback returns;
     // `defineConfig` accepts an `extensionPacks` key and silently ignores it.
     extensionPacks: {
       zodJson: zodJsonPack,

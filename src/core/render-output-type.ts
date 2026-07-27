@@ -3,7 +3,7 @@
  *
  * The emitted contract types are the reason to declare a column's shape at all, so a JSON column
  * should read as `{ name: string; age?: number }` and not as `unknown`. Anything this cannot name
- * falls back to `unknown` — a wrong type is worse than an honest one.
+ * falls back to `unknown`: a wrong type is worse than an honest one.
  */
 
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;

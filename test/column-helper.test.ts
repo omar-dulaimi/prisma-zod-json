@@ -30,7 +30,7 @@ describe('zodJson column spec', () => {
 /**
  * The column site has the author's original schema in a closure; the runtime factory has only what
  * the contract carried. If the two disagree, the column enforces different rules depending on which
- * built it — passing in development and failing in production, or the reverse. They must not.
+ * built it, passing in development and failing in production, or the reverse. They must not.
  */
 describe('the column site and the runtime factory enforce identical rules', () => {
   const cases: [name: string, schema: z.ZodType, options: Parameters<typeof zodJson>[1], probe: unknown][] = [

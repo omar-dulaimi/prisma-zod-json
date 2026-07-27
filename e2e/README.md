@@ -1,7 +1,7 @@
 # End-to-end check
 
 Proves the codec works in a real Prisma Next project against a real database. The unit tests cannot:
-they never go through `contract emit`, the DDL planner, or the query path — and that gap hid two live
+they never go through `contract emit`, the DDL planner, or the query path, and that gap hid two live
 bugs (see below).
 
 `fixture/` is a real Prisma Next Postgres project that links this package via `link:../..`. CI runs the
@@ -18,7 +18,7 @@ whole thing on every push; see `.github/workflows/ci.yml`.
 `fixture/live-write-validation.mts`, against the live database:
 
 - a valid object writes
-- seven invalid writes are each rejected **at encode**, naming their path — including
+- seven invalid writes are each rejected **at encode**, naming their path, including
   `notifications.digestHour` and an undeclared key
 - exactly one row was added: the rejected writes never landed
 - the stored row reads back through decode
@@ -26,7 +26,7 @@ whole thing on every push; see `.github/workflows/ci.yml`.
 ## The negative control
 
 CI then flips the column to `validateOnWrite: false` and **requires the check to fail**. A test that
-cannot fail proves nothing — and this one silently could not. It reported 8/8 with validation disabled,
+cannot fail proves nothing, and this one silently could not. It reported 8/8 with validation disabled,
 which is how the transport bugs below were found.
 
 ## What that flushed out
@@ -39,7 +39,7 @@ which is how the transport bugs below were found.
 - `validateOnWrite: false` was dropped, so the documented opt-out did nothing.
 
 Fixed by storing the schema as a JSON string the walk cannot descend into, and encoding the opt-out as
-a truthy `writeValidation: 'off'` — so a marker lost in transit leaves validation on rather than off.
+a truthy `writeValidation: 'off'`, so a marker lost in transit leaves validation on rather than off.
 
 ## Running it locally
 
@@ -63,8 +63,7 @@ Re-runnable: each run scopes its own ids and asserts on the row delta, so no tru
 Each of these cost a debugging cycle:
 
 - the column goes in as `field.column(zodJson(S))`, not `zodJson(S)` on its own
-- `extensionPacks` belongs in the object the `defineContract` callback **returns**, beside `models` —
-  not in `defineConfig`, which accepts it silently and ignores it
+- `extensionPacks` belongs in the object the `defineContract` callback **returns**, beside `models`, not in `defineConfig`, which accepts it silently and ignores it
 - the control-plane descriptor goes in `defineConfig({ extensions: [...] })`, and without it `db init`
   fails with `no expandNativeType hook is registered`
 - the runtime descriptor goes in `postgres({ extensions: [...] })`, and without it client construction

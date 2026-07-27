@@ -31,7 +31,7 @@ describe('findUnrepresentable', () => {
 });
 
 /**
- * A container the walker forgets to descend into is a refinement it silently misses — the exact bug
+ * A container the walker forgets to descend into is a refinement it silently misses: the exact bug
  * this module exists to prevent. One case per child-key branch.
  */
 describe('findUnrepresentable traverses every container', () => {

@@ -1,4 +1,4 @@
-# zod/json@1 — a typed JSON column for Prisma Next, validated by zod
+# zod/json@1: a typed JSON column for Prisma Next, validated by zod
 
 Design doc, written before implementation and kept as a record of the decisions and the measurements
 behind them.
@@ -24,7 +24,7 @@ The stated prerequisite was a "clean serialize / rehydrate story". Zod 4.4.3 has
 
 Measured on zod 4.4.3, across 41 constructs for serialisability and 28 for behaviour:
 
-- **36/41 serialise.** The 5 that don't — `bigint`, `date`, `transform`, `map`, `set` — throw from
+- **36/41 serialise.** The 5 that don't (`bigint`, `date`, `transform`, `map`, `set`) throw from
   `z.toJSONSchema()` with a clear message ("BigInt cannot be represented in JSON Schema").
 - **24/28 keep their behaviour** through a full round-trip: `min`/`max`, `int`, `regex`, `email`,
   `uuid`, `url`, `iso.datetime`, `multipleOf`, enums, literals, tuples, records, intersections,
@@ -43,26 +43,26 @@ In scope:
 
 Out of scope, deliberately:
 
-- generating zod schemas for whole models from the contract — a different product, much larger
+- generating zod schemas for whole models from the contract: a different product, much larger
 - non-Postgres targets: the native type is `jsonb`; other targets come later if wanted
 - codec ids for other libraries
 
-## The silent-drop problem — the reason this package is worth building
+## The silent-drop problem: the reason this package is worth building
 
 Four constructs round-trip **without throwing and without working**:
 
 | construct | round-tripped result |
 | --- | --- |
-| `.refine(fn)` | check vanishes — `z.string().refine(s => s.startsWith('a'))` accepts `"zzz"` |
+| `.refine(fn)` | check vanishes: `z.string().refine(s => s.startsWith('a'))` accepts `"zzz"` |
 | `.superRefine(fn)` | same |
 | object-level `.refine()` | `z.object({lo,hi}).refine(o => o.lo < o.hi)` accepts `{lo:5, hi:1}` |
-| `.catch(v)` | fallback lost — the schema starts rejecting input it used to absorb |
+| `.catch(v)` | fallback lost: the schema starts rejecting input it used to absorb |
 
 `z.toJSONSchema()` emits a bare `{"type":"string"}` and reports nothing. Neither
-`unrepresentable: 'throw'` nor `io: 'input' | 'output'` changes that — all three were tried and none
+`unrepresentable: 'throw'` nor `io: 'input' | 'output'` changes that, all three were tried and none
 throws.
 
-So the naive implementation of this package — serialise, rehydrate, validate — hands somebody a
+So the naive implementation of this package (serialise, rehydrate, validate) hands somebody a
 column that enforces *nothing* of their refinement, and never says so. A validator that appears to
 protect and does not is worse than no validator: it moves the error away from the code that caused it
 and buys false confidence in between. Shipping that would be worse than shipping nothing.
@@ -73,7 +73,7 @@ marks a swallowed fallback. A recursive walk finds them wherever they are nested
 path. `zodJson(z.object({ user: z.object({ slug: z.string().refine(isSlug) }) }))` fails on the spot
 with `user.slug`, not silently at runtime.
 
-Traversal follows these child keys, verified empirically rather than assumed — a missed branch is a
+Traversal follows these child keys, verified empirically rather than assumed: a missed branch is a
 missed refinement, which is the whole bug:
 
 `object.shape` · `array.element` · `union.options` · `intersection.{left,right}` ·
@@ -96,7 +96,7 @@ async encode(value, _ctx) { return serializeWire(value); }        // no validati
 async decode(wire, _ctx)  { return decodeWireValue(schema, wire); } // validates
 ```
 
-Its README concedes the consequence: "schema-invalid writes can commit before failing on read-back — a
+Its README concedes the consequence: "schema-invalid writes can commit before failing on read-back, a
 footgun requiring TypeScript discipline or pre-validation".
 
 TypeScript discipline does not survive `any`, a JSON body off an HTTP request, or a backfill script.
@@ -144,7 +144,7 @@ rebuild a validator. The rehydrated schema is closure-captured by the codec inst
 
 Validation failures raise the framework's runtime error with a stable code, carrying zod's issue list
 flattened to a readable summary and the path of the first failure. Read and write failures are
-distinguishable — a caller needs to know whether their input was bad or their stored data is.
+distinguishable: a caller needs to know whether their input was bad or their stored data is.
 
 ## Testing
 
@@ -158,7 +158,7 @@ TDD throughout: a failing test before each behaviour.
 - errors name the offending path
 - the column helper produces a `ColumnSpec` satisfying `ColumnHelperFor`
 - **every silently-dropped construct is caught**: top-level refine, nested refine, object-level
-  refine, superRefine, catch — each reported with its path
+  refine, superRefine, catch: each reported with its path
 - the walker reaches through every child-key branch listed above, one test per container type, so a
   refinement hidden in a tuple rest element or a `pipe` output is still found
 - `lazy` recursion terminates
@@ -173,7 +173,7 @@ land in `contract.json`.
 
 - **API churn.** `prisma-next` is 0.16.0 and ships upgrade codemods for every minor from 0.7 to 0.17.
   Mitigation: keep the surface thin, pin exact versions, expect to follow.
-- **Silent drops** — measured and handled above; the detector is the mitigation, and the walker's
+- **Silent drops**: measured and handled above; the detector is the mitigation, and the walker's
   completeness is what the tests must pin down. A construct zod adds later that we don't traverse is
   the way this regresses.
 - **Codec id collision.** If Prisma ships their own `zod/json@1`, ours conflicts. Mitigation: it is the

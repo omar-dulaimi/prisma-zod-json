@@ -5,7 +5,7 @@ import { zodJsonDescriptor } from '../src/core/zod-json-codec.js';
 
 /**
  * A discriminated union does not survive as one: `z.fromJSONSchema` rebuilds `oneOf` as a plain union,
- * so zod tries every branch, all fail, and the top-level issue is a bare `invalid_union` — "Invalid
+ * so zod tries every branch, all fail, and the top-level issue is a bare `invalid_union`, "Invalid
  * input" at the root, naming nothing.
  *
  * That guts the promise this codec makes. The per-branch failures are there in `issue.errors`, so the

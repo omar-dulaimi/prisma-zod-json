@@ -2,12 +2,12 @@
  * The claim this package makes over validating on read alone: an invalid write is rejected before it
  * reaches the database, naming the offending field.
  *
- * Unit tests cannot prove that — they never go through `contract emit`, the DDL planner or the query
+ * Unit tests cannot prove that: they never go through `contract emit`, the DDL planner or the query
  * path. This does. Exits non-zero on the first broken expectation.
  */
 import 'dotenv/config';
 import postgres from '@prisma-next/postgres/runtime';
-// Registration 3 of 3 — the runtime plane. Without it, constructing the client fails with
+// Registration 3 of 3: the runtime plane. Without it, constructing the client fails with
 // "no contributor registered a codec descriptor for that codecId".
 import { zodJsonRuntimeDescriptor } from 'prisma-next-zod-json/runtime';
 import contractJson from './src/prisma/contract.json' with { type: 'json' };
@@ -51,7 +51,7 @@ async function expectAccepted(label: string, settings: unknown, n: number): Prom
     await accounts.create({ id: idFor(n), email: `user${n}.${run}@example.test`, settings });
     record(true, label);
   } catch (error) {
-    record(false, `${label} — rejected a valid value: ${(error as Error).message.split('\n')[0]}`);
+    record(false, `${label}: rejected a valid value: ${(error as Error).message.split('\n')[0]}`);
   }
 }
 
@@ -59,7 +59,7 @@ async function expectAccepted(label: string, settings: unknown, n: number): Prom
 async function expectRejectedAt(label: string, settings: unknown, path: string, n: number): Promise<void> {
   try {
     await accounts.create({ id: idFor(n), email: `user${n}.${run}@example.test`, settings });
-    record(false, `${label} — the write was ACCEPTED; invalid data reached the database`);
+    record(false, `${label}: the write was ACCEPTED; invalid data reached the database`);
   } catch (error) {
     const message = (error as Error).message;
     const named = message.includes(path);
@@ -67,8 +67,8 @@ async function expectRejectedAt(label: string, settings: unknown, path: string, 
     record(
       named && onWrite,
       named && onWrite
-        ? `${label} — rejected on write, naming \`${path}\``
-        : `${label} — rejected, but ${named ? 'not on the write path' : `did not name \`${path}\``}: ${message.split('\n')[0]}`,
+        ? `${label}: rejected on write, naming \`${path}\``
+        : `${label}: rejected, but ${named ? 'not on the write path' : `did not name \`${path}\``}: ${message.split('\n')[0]}`,
     );
   }
 }
@@ -89,14 +89,14 @@ await expectRejectedAt('a missing required object', { theme: 'dark', locale: 'en
 await expectRejectedAt('a too-short string', { ...valid, locale: 'e' }, 'locale', 6);
 
 // Regression: the emitter strips boolean `false` from type params, which once removed
-// `additionalProperties: false` from the stored schema and left the column silently accepting — and
-// persisting — undeclared keys. Storing the schema as a string fixed it; this keeps it fixed.
+// `additionalProperties: false` from the stored schema and left the column silently accepting, and
+// persisting, undeclared keys. Storing the schema as a string fixed it; this keeps it fixed.
 await expectRejectedAt('an undeclared key', { ...valid, sneaky: 'value' }, 'sneaky', 7);
 
 // The whole point of validating on write: the rejected rows must not be in the table.
 const rows = await accounts.all();
 const added = rows.length - before;
-record(added === 1, `exactly one row committed (added ${added}) — the six rejected writes never landed`);
+record(added === 1, `exactly one row committed (added ${added}): the six rejected writes never landed`);
 
 // And what did land must survive a read, proving decode accepts what encode produced.
 const stored = (rows as { id?: string; settings?: { theme?: string } }[]).find((r) => r.id === idFor(1));

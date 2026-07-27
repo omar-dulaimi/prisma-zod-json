@@ -5,7 +5,7 @@ import { zodJson, zodJsonDescriptor } from '../src/core/zod-json-codec.js';
 
 /**
  * `prisma-next contract emit` does not store type params verbatim: it walks them and **drops every
- * boolean `false`, recursively**. Measured against 0.16.0 by emitting probe values — `'off'`, `true`
+ * boolean `false`, recursively**. Measured against 0.16.0 by emitting probe values: `'off'`, `true`
  * and `0` all survived; only `false` disappeared.
  *
  * That matters twice over. `additionalProperties: false` is how JSON Schema says "reject unknown
@@ -77,7 +77,7 @@ describe('validateOnWrite: false survives the contract', () => {
     await expect(codec.encode({ a: 123 } as never, {} as never)).rejects.toThrow(/encode/);
   });
 
-  test('a dropped marker fails safe — validation on, never silently off', async () => {
+  test('a dropped marker fails safe, validation on, never silently off', async () => {
     const spec = zodJson(z.object({ a: z.string() }), { validateOnWrite: false });
     const { jsonSchema, version } = spec.typeParams as { jsonSchema: unknown; version: number };
     const codec = zodJsonDescriptor.factory({ jsonSchema, version } as never)({} as never);

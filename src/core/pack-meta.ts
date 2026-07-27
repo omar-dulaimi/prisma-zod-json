@@ -1,5 +1,5 @@
 /**
- * zod-json pack metadata — the framework-composition entry point.
+ * zod-json pack metadata: the framework-composition entry point.
  *
  * Control-stack assembly reads `types.codecTypes.import` to thread the type-side import into the
  * emitted `contract.d.ts`, and `types.storage` declares that `zod/json@1` is backed by `jsonb` on

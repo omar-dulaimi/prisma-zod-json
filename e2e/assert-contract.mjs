@@ -43,7 +43,7 @@ if (schema) {
   check(schema.type === 'object', 'the stored schema survived as an object schema');
   check(
     schema.additionalProperties === false,
-    'additionalProperties: false survived — the column still rejects undeclared keys',
+    'additionalProperties: false survived: the column still rejects undeclared keys',
   );
   check(
     schema.properties?.notifications?.properties?.digestHour?.maximum === 23,

@@ -19,7 +19,7 @@ export type ZodJsonTypeParams = {
    * The JSON Schema, **serialised to a string**.
    *
    * It would be more natural to store the object. `prisma-next contract emit` walks nested type params
-   * and drops every boolean `false` — measured on 0.16.0 — and `additionalProperties: false` is how
+   * and drops every boolean `false`: measured on 0.16.0, and `additionalProperties: false` is how
    * JSON Schema says "reject unknown keys". Stored as an object, a strict schema comes back loose and
    * quietly persists keys it never declared. A string is opaque to that walk, and to any future
    * normalisation of key order or empty values.
@@ -54,7 +54,7 @@ export function toTypeParams(schema: unknown, options: SerializeOptions = {}): Z
       throw new Error(
         `zodJson(schema): this schema cannot be represented in JSON Schema without losing behaviour.\n` +
           `${describe(found)}\n` +
-          `Zod does not report these — they serialise without error and stop being enforced.\n` +
+          `Zod does not report these: they serialise without error and stop being enforced.\n` +
           `Express the rule with a constraint that survives (min/max, regex, enum, multipleOf, and the ` +
           `string formats all do), apply it outside the column, or pass ` +
           `{ allowUnrepresentable: true } to accept the loss.`,
@@ -66,10 +66,10 @@ export function toTypeParams(schema: unknown, options: SerializeOptions = {}): Z
   try {
     jsonSchema = z.toJSONSchema(schema as z.ZodType) as Record<string, unknown>;
   } catch (cause) {
-    // Zod's own refusals — BigInt, Date, transforms, Map, Set. Its message names the construct but not
+    // Zod's own refusals, BigInt, Date, transforms, Map, Set. Its message names the construct but not
     // the caller, so say where it came from.
     throw new Error(
-      `zodJson(schema): zod cannot serialise this schema — ${(cause as Error).message}`,
+      `zodJson(schema): zod cannot serialise this schema, ${(cause as Error).message}`,
       { cause },
     );
   }

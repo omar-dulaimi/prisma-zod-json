@@ -2,7 +2,7 @@
  * Detects constraints that `z.toJSONSchema()` drops without telling anyone.
  *
  * Zod throws for constructs it cannot represent at all (BigInt, Date, transforms, Map, Set). It does
- * not throw for `.refine()`, `.superRefine()` or `.catch()` — those are simply absent from the emitted
+ * not throw for `.refine()`, `.superRefine()` or `.catch()`: those are simply absent from the emitted
  * JSON Schema, so a rehydrated validator silently stops enforcing them. Neither
  * `unrepresentable: 'throw'` nor the `io` option changes that, so the def tree is the only source of
  * truth and this module walks it.
@@ -63,7 +63,7 @@ export function findUnrepresentable(schema: unknown): Unrepresentable[] {
     for (const check of def.checks ?? []) {
       const kind = checkKind(check);
       if (kind === 'custom') found.push({ path, reason: 'refinement' });
-      // `.trim()`, `.toLowerCase()`, `.normalize()` — value-rewriting checks. They keep accepting the
+      // `.trim()`, `.toLowerCase()`, `.normalize()`: value-rewriting checks. They keep accepting the
       // same input after a round-trip but stop rewriting it, so the unnormalised value reaches the
       // database. Silent and in the unsafe direction, unlike the object-strictness change.
       if (kind === 'overwrite') found.push({ path, reason: 'transform' });
@@ -79,7 +79,7 @@ export function findUnrepresentable(schema: unknown): Unrepresentable[] {
     if (def.rest !== undefined) walk(def.rest, join(path, '[...]'));
     if (def.keyType !== undefined) walk(def.keyType, join(path, '{key}'));
     if (def.valueType !== undefined) walk(def.valueType, join(path, '{}'));
-    // Wrappers — optional, nullable, default, catch, readonly, nonoptional — do not add a path step:
+    // Wrappers (optional, nullable, default, catch, readonly, nonoptional) do not add a path step:
     // the constraint belongs to the field the author named, not to the wrapper.
     if (def.innerType !== undefined) walk(def.innerType, path);
     if (def.in !== undefined) walk(def.in, join(path, 'in'));

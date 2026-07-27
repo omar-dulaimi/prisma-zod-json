@@ -37,7 +37,7 @@ Requires `zod@^4.1` (for `z.fromJSONSchema`) and `prisma-next@0.16`.
 Three planes, three registrations. All three are needed: the contract plane to author the column, the
 control plane to create the table, the runtime plane to read and write it.
 
-**Contract** — in the object your `defineContract` callback returns, next to `models`:
+**Contract**: in the object your `defineContract` callback returns, next to `models`:
 
 ```ts
 import zodJsonPack from 'prisma-next-zod-json/pack';
@@ -48,7 +48,7 @@ export const contract = defineContract({}, ({ field, model }) => ({
 }));
 ```
 
-**Control** — in `prisma-next.config.ts`, so `db init` and migrations know the column:
+**Control**: in `prisma-next.config.ts`, so `db init` and migrations know the column:
 
 ```ts
 import { zodJsonExtensionDescriptor } from 'prisma-next-zod-json/control';
@@ -60,7 +60,7 @@ export default defineConfig({
 });
 ```
 
-**Runtime** — where you construct the client:
+**Runtime**: where you construct the client:
 
 ```ts
 import { zodJsonRuntimeDescriptor } from 'prisma-next-zod-json/runtime';
@@ -75,7 +75,7 @@ Miss one and you get a clear error naming what is absent, not silent misbehaviou
 ### It validates writes
 
 `arktype/json@1` validates on `decode` only. Its README is candid about the consequence: "schema-invalid
-writes can commit before failing on read-back — a footgun requiring TypeScript discipline or
+writes can commit before failing on read-back: a footgun requiring TypeScript discipline or
 pre-validation".
 
 Discipline does not survive `any`, a JSON body off an HTTP request, or a backfill script. A validator
@@ -94,12 +94,12 @@ measured a hot path and want the permissive behaviour.
 
 ### It refuses schemas that JSON Schema would quietly break
 
-Zod throws for constructs it cannot represent — `bigint`, `date`, `.transform()`, `Map`, `Set`. It does
+Zod throws for constructs it cannot represent: `bigint`, `date`, `.transform()`, `Map`, `Set`. It does
 **not** throw for these, which serialise cleanly and then stop working:
 
 | construct | what happens after a round-trip |
 | --- | --- |
-| `.refine(fn)` / `.superRefine(fn)` | check vanishes — `z.string().refine(s => s.startsWith('a'))` accepts `"zzz"` |
+| `.refine(fn)` / `.superRefine(fn)` | check vanishes: `z.string().refine(s => s.startsWith('a'))` accepts `"zzz"` |
 | object-level `.refine()` | `z.object({lo,hi}).refine(o => o.lo < o.hi)` accepts `{lo:5, hi:1}` |
 | `.catch(v)` | fallback lost; the schema starts rejecting input it used to absorb |
 | `.trim()` / `.toLowerCase()` / `.normalize()` | keeps accepting the value, silently stops rewriting it |
@@ -110,7 +110,7 @@ itself and refuses at authoring time:
 ```
 zodJson(schema): this schema cannot be represented in JSON Schema without losing behaviour.
   • user.slug: a refinement (.refine/.superRefine), which would silently stop being enforced
-Zod does not report these — they serialise without error and stop being enforced.
+Zod does not report these: they serialise without error and stop being enforced.
 Express the rule with a constraint that survives (min/max, regex, enum, multipleOf, and the string
 formats all do), apply it outside the column, or pass { allowUnrepresentable: true } to accept the loss.
 ```
@@ -128,7 +128,7 @@ tuples (with rest) · unions · discriminated unions · intersections · records
 
 Zod's default object mode **strips** unknown keys. JSON Schema can say "forbid"
 (`additionalProperties: false`) or "allow" (`additionalProperties: {}`), but has no way to say "allow in,
-drop from output" — so a round-tripped `z.object()` **rejects** unknown keys instead of stripping them.
+drop from output", so a round-tripped `z.object()` **rejects** unknown keys instead of stripping them.
 
 That is kept rather than refused, because refusing the most common construct in the language would make
 the package unusable, and because it fails in the safe direction: a loud error at the write boundary
@@ -139,7 +139,7 @@ exactly.
 
 `renderOutputType` builds a TypeScript type from the stored JSON Schema, so a column reads as
 `{ theme: "light" | "dark"; tags: Array<string> }` rather than `unknown`. Anything it cannot name renders
-as `unknown` — a wrong type is worse than an honest one.
+as `unknown`: a wrong type is worse than an honest one.
 
 ## Status
 
