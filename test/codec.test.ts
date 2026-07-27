@@ -106,3 +106,30 @@ describe('the descriptor identifies itself as the codec Prisma specified', () =>
     expect(zodJsonDescriptor.targetTypes).toContain('jsonb');
   });
 });
+
+/**
+ * The message wording is the package's main output when something is wrong, so it is pinned. An earlier
+ * version repeated the path, reading "at `a.b`: a.b: Too big".
+ */
+describe('the failure message reads cleanly', () => {
+  const Nested = z.object({ notifications: z.object({ digestHour: z.number().int().max(23) }) });
+
+  test('a single issue names the path once', async () => {
+    const codec = codecFor(Nested);
+
+    await expect(
+      codec.encode({ notifications: { digestHour: 99 } } as never, ctx),
+    ).rejects.toThrow(
+      'zod/json schema validation failed (encode) at `notifications.digestHour`: Too big: expected number to be <=23',
+    );
+  });
+
+  test('several issues list every path instead of a prefix pointing at one', async () => {
+    const codec = codecFor(z.object({ a: z.string(), b: z.number() }));
+    const error = await codec.encode({ a: 1, b: 'x' } as never, ctx).catch((e: Error) => e);
+
+    expect((error as Error).message).toContain('a: Invalid input');
+    expect((error as Error).message).toContain('b: Invalid input');
+    expect((error as Error).message).not.toContain('at `a`');
+  });
+});

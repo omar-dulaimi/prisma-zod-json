@@ -81,12 +81,19 @@ function flattenIssues(issues: readonly Issue[]): readonly Issue[] {
 function fail(phase: 'encode' | 'decode', error: z.ZodError): never {
   const issues = flattenIssues(error.issues);
   const first = issues[0];
-  const at = first && first.path.length > 0 ? ` at \`${first.path.join('.')}\`` : '';
+  const single = issues.length === 1 ? first : undefined;
+
+  // One issue: name the path once in the prefix and give the bare message, so it reads
+  // "at `a.b`: Too big" rather than "at `a.b`: a.b: Too big". Several issues: drop the prefix, which
+  // could only point at the first, and let the list carry every path.
+  const at = single && single.path.length > 0 ? ` at \`${single.path.join('.')}\`` : '';
+  const detail = single
+    ? single.message
+    : issues.map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`).join('; ');
+
   throw runtimeError(
     'RUNTIME.JSON_SCHEMA_VALIDATION_FAILED',
-    `zod/json schema validation failed (${phase})${at}: ${issues
-      .map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`)
-      .join('; ')}`,
+    `zod/json schema validation failed (${phase})${at}: ${detail}`,
     { codecId: ZOD_JSON_CODEC_ID, phase, issues },
   );
 }
