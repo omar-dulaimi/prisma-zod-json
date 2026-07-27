@@ -57,10 +57,10 @@
       "@semantic-release/github",
       {
         "successComment": "🎉 Released in [v${nextRelease.version}](https://www.npmjs.com/package/prisma-next-zod-json/v/${nextRelease.version}).",
-        "failComment": "❌ The release from `${branch.name}` failed. See the [run logs](https://github.com/omar-dulaimi/prisma-next-zod-json/actions/workflows/release.yml).",
-        "failTitle": "🚨 The automated release failed",
-        "labels": ["released"],
-        "assignees": ["omar-dulaimi"]
+        "//": "No failure issue: the workflow run already reports it, and the fail step's own GraphQL call was erroring and masking the real cause.",
+        "failComment": false,
+        "failTitle": false,
+        "labels": ["released"]
       }
     ]
   ]
