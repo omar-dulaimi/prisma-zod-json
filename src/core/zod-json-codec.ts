@@ -19,7 +19,13 @@ import {
 import { runtimeError } from '@prisma-next/framework-components/runtime';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { z } from 'zod';
-import { rehydrate, type SerializeOptions, toTypeParams, type ZodJsonTypeParams } from './serialize.js';
+import {
+  parseJsonSchema,
+  rehydrate,
+  type SerializeOptions,
+  toTypeParams,
+  type ZodJsonTypeParams,
+} from './serialize.js';
 import { renderOutputType } from './render-output-type.js';
 
 /** Codec id for zod-backed JSON columns. Library-bound, not target-bound. */
@@ -27,9 +33,15 @@ export const ZOD_JSON_CODEC_ID = 'zod/json@1' as const;
 const ZOD_JSON_NATIVE_TYPE = 'jsonb' as const;
 const ZOD_JSON_META = { db: { sql: { postgres: { nativeType: ZOD_JSON_NATIVE_TYPE } } } } as const;
 
-/** Type params as stored in the contract. Absent `validateOnWrite` reads as on. */
+/**
+ * Type params as stored in the contract.
+ *
+ * The opt-out is a present-and-truthy `'off'` rather than `validateOnWrite: false`, because the
+ * contract emitter drops boolean `false` (see `serialize.ts`). Encoded this way, a marker lost in
+ * transit means validation stays **on** — the safe direction.
+ */
 export type ZodJsonParams = ZodJsonTypeParams & {
-  readonly validateOnWrite?: boolean | undefined;
+  readonly writeValidation?: 'off' | undefined;
 };
 
 function fail(phase: 'encode' | 'decode', error: z.ZodError): never {
@@ -114,8 +126,8 @@ export class ZodJsonCodecClass<TInferred> extends CodecImpl<
 /** Structural check on the stored params; the JSON Schema itself is validated by rehydration. */
 const paramsSchema = z.looseObject({
   version: z.number(),
-  jsonSchema: z.record(z.string(), z.unknown()),
-  validateOnWrite: z.boolean().optional(),
+  jsonSchema: z.string(),
+  writeValidation: z.literal('off').optional(),
 }) satisfies StandardSchemaV1<ZodJsonParams>;
 
 export class ZodJsonDescriptor extends CodecDescriptorImpl<ZodJsonParams> {
@@ -126,12 +138,12 @@ export class ZodJsonDescriptor extends CodecDescriptorImpl<ZodJsonParams> {
   override readonly paramsSchema: StandardSchemaV1<ZodJsonParams> = paramsSchema;
 
   override renderOutputType(params: ZodJsonParams): string {
-    return renderOutputType(params.jsonSchema);
+    return renderOutputType(parseJsonSchema(params));
   }
 
   override factory(params: ZodJsonParams): (ctx: CodecInstanceContext) => ZodJsonCodecClass<unknown> {
     const schema = rehydrate(params);
-    const validateOnWrite = params.validateOnWrite ?? true;
+    const validateOnWrite = params.writeValidation !== 'off';
     return () => new ZodJsonCodecClass<unknown>(this, schema, validateOnWrite);
   }
 }
@@ -165,7 +177,11 @@ export function zodJson<S extends z.ZodType>(
   options: ZodJsonColumnOptions = {},
 ): ColumnSpec<ZodJsonCodecClass<z.output<S>>, ZodJsonParams> {
   const { validateOnWrite = true, ...serializeOptions } = options;
-  const params: ZodJsonParams = { ...toTypeParams(schema, serializeOptions), validateOnWrite };
+  const params: ZodJsonParams = {
+    ...toTypeParams(schema, serializeOptions),
+    // Written only when disabled: absence is the default, and the default is to validate.
+    ...(validateOnWrite ? {} : { writeValidation: 'off' as const }),
+  };
   const effective = rehydrate(params);
 
   return column(

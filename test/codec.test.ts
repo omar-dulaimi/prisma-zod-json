@@ -47,7 +47,8 @@ describe('encode validates before writing', () => {
 });
 
 describe('validateOnWrite: false restores the permissive behaviour', () => {
-  const params = { ...toTypeParams(Profile), validateOnWrite: false };
+  // Stored as a truthy `'off'`, not `false` — the contract emitter drops boolean false.
+  const params = { ...toTypeParams(Profile), writeValidation: 'off' as const };
 
   test('lets an invalid value through to storage', async () => {
     const codec = codecFor(Profile, params);

@@ -12,9 +12,10 @@ describe('zodJson column spec', () => {
   });
 
   test('carries the serialised schema in typeParams, so it reaches the contract', () => {
-    expect(spec.typeParams).toMatchObject({
-      version: 1,
-      jsonSchema: { type: 'object', properties: { a: { type: 'string', minLength: 2 } } },
+    expect(spec.typeParams.version).toBe(1);
+    expect(JSON.parse(spec.typeParams.jsonSchema)).toMatchObject({
+      type: 'object',
+      properties: { a: { type: 'string', minLength: 2 } },
     });
   });
 

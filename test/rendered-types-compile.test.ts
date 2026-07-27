@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import ts from 'typescript';
 import { z } from 'zod';
 import { renderOutputType } from '../src/core/render-output-type.js';
-import { toTypeParams } from '../src/core/serialize.js';
+import { parseJsonSchema, toTypeParams } from '../src/core/serialize.js';
 
 /**
  * The rendered string lands in a generated `.d.ts`. If it does not parse, the consumer's build breaks
@@ -50,7 +50,7 @@ const corpus: [name: string, schema: z.ZodType][] = [
 
 describe('every rendered type parses as TypeScript', () => {
   test.each(corpus)('%s', (_name, schema) => {
-    const rendered = renderOutputType(toTypeParams(schema).jsonSchema);
+    const rendered = renderOutputType(parseJsonSchema(toTypeParams(schema)));
 
     expect(syntaxErrorsIn(rendered), `rendered: ${rendered}`).toEqual([]);
   });

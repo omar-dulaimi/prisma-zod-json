@@ -1,0 +1,28 @@
+{
+  "name": "prisma-next-zod-json-e2e-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A real Prisma Next project used to prove the codec works end to end. Not published.",
+  "scripts": {
+    "emit": "prisma-next contract emit",
+    "db:init": "prisma-next db init",
+    "check": "tsx live-write-validation.mts"
+  },
+  "dependencies": {
+    "@prisma-next/adapter-postgres": "0.16.0",
+    "@prisma-next/contract": "0.16.0",
+    "@prisma-next/contract-authoring": "0.16.0",
+    "@prisma-next/family-sql": "0.16.0",
+    "@prisma-next/framework-components": "0.16.0",
+    "@prisma-next/postgres": "0.16.0",
+    "@prisma-next/sql-contract": "0.16.0",
+    "@prisma-next/sql-relational-core": "0.16.0",
+    "@prisma-next/sql-runtime": "0.16.0",
+    "dotenv": "^17.0.0",
+    "prisma-next": "0.16.0",
+    "prisma-next-zod-json": "link:../..",
+    "tsx": "^4.20.0",
+    "zod": "4.4.3"
+  }
+}

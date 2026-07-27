@@ -15,7 +15,16 @@ export const TYPE_PARAMS_VERSION = 1;
 // `ColumnSpec`'s `Record<string, unknown>` constraint on type params requires.
 export type ZodJsonTypeParams = {
   readonly version: number;
-  readonly jsonSchema: Record<string, unknown>;
+  /**
+   * The JSON Schema, **serialised to a string**.
+   *
+   * It would be more natural to store the object. `prisma-next contract emit` walks nested type params
+   * and drops every boolean `false` — measured on 0.16.0 — and `additionalProperties: false` is how
+   * JSON Schema says "reject unknown keys". Stored as an object, a strict schema comes back loose and
+   * quietly persists keys it never declared. A string is opaque to that walk, and to any future
+   * normalisation of key order or empty values.
+   */
+  readonly jsonSchema: string;
 };
 
 export interface SerializeOptions {
@@ -65,7 +74,20 @@ export function toTypeParams(schema: unknown, options: SerializeOptions = {}): Z
     );
   }
 
-  return { version: TYPE_PARAMS_VERSION, jsonSchema };
+  return { version: TYPE_PARAMS_VERSION, jsonSchema: JSON.stringify(jsonSchema) };
+}
+
+/** The JSON Schema as an object, for callers that need to inspect it (the type renderer, tests). */
+export function parseJsonSchema(params: ZodJsonTypeParams): Record<string, unknown> {
+  try {
+    return JSON.parse(params.jsonSchema) as Record<string, unknown>;
+  } catch (cause) {
+    throw new Error(
+      `zod/json@1: the stored JSON Schema is not valid JSON. The contract was likely hand-edited; ` +
+        `re-run \`prisma-next contract emit\`.`,
+      { cause },
+    );
+  }
 }
 
 export function rehydrate(params: ZodJsonTypeParams): z.ZodType {
@@ -75,5 +97,5 @@ export function rehydrate(params: ZodJsonTypeParams): z.ZodType {
         `${TYPE_PARAMS_VERSION}). The column was authored by a newer version of the extension.`,
     );
   }
-  return z.fromJSONSchema(params.jsonSchema as never) as z.ZodType;
+  return z.fromJSONSchema(parseJsonSchema(params) as never) as z.ZodType;
 }

@@ -1,13 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import { z } from 'zod';
-import { rehydrate, toTypeParams } from '../src/core/serialize.js';
+import { parseJsonSchema, rehydrate, toTypeParams } from '../src/core/serialize.js';
 
 describe('toTypeParams', () => {
   test('serialises a representable schema to versioned type params', () => {
     const params = toTypeParams(z.object({ a: z.string().min(2) }));
 
     expect(params.version).toBe(1);
-    expect(params.jsonSchema).toMatchObject({
+    // Stored as a string so the contract emitter cannot walk into it and strip `false`.
+    expect(typeof params.jsonSchema).toBe('string');
+    expect(parseJsonSchema(params)).toMatchObject({
       type: 'object',
       properties: { a: { type: 'string', minLength: 2 } },
     });
@@ -39,7 +41,7 @@ describe('toTypeParams', () => {
   test('allowUnrepresentable lets an author proceed knowing the constraint is dropped', () => {
     const params = toTypeParams(z.string().refine(() => true), { allowUnrepresentable: true });
 
-    expect(params.jsonSchema).toMatchObject({ type: 'string' });
+    expect(parseJsonSchema(params)).toMatchObject({ type: 'string' });
   });
 
   test('wraps the constructs zod itself rejects, rather than leaking a bare zod message', () => {

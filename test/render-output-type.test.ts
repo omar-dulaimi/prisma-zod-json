@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import { z } from 'zod';
 import { renderOutputType } from '../src/core/render-output-type.js';
-import { toTypeParams } from '../src/core/serialize.js';
+import { parseJsonSchema, toTypeParams } from '../src/core/serialize.js';
 
 /** Rendered from what zod actually emits, so the cases stay true as zod's output shifts. */
 function render(schema: z.ZodType): string {
-  return renderOutputType(toTypeParams(schema).jsonSchema);
+  return renderOutputType(parseJsonSchema(toTypeParams(schema)));
 }
 
 describe('renderOutputType', () => {
