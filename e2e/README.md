@@ -1,51 +1,62 @@
 # End-to-end check
 
-Proves the codec works in a real Prisma Next project against a real database — the unit tests cannot,
-because they never go through `contract emit`, the DDL planner, or the query path.
+Proves the codec works in a real Prisma Next project against a real database. The unit tests cannot:
+they never go through `contract emit`, the DDL planner, or the query path — and that gap hid two live
+bugs (see below).
 
-Not wired into `pnpm test`: it needs Postgres, a linked build, and a scratch project.
+`fixture/` is a real Prisma Next Postgres project that links this package via `link:../..`. CI runs the
+whole thing on every push; see `.github/workflows/ci.yml`.
 
-## What it proved
+## What it checks
 
-Run against `prisma-next@0.16.0` and Postgres 16:
+`assert-contract.mjs`, against the emitted `contract.json`:
 
-- `contract emit` succeeds with a `zodJson` column, and both contract planes carry it — `domain` with
-  codec id `zod/json@1` and the full JSON Schema in `typeParams`, `storage` with `nativeType: jsonb`,
-  `version` and `validateOnWrite`
-- `db init` creates the `settings jsonb` column
-- a valid write succeeds
-- four invalid writes are rejected **at encode**, each naming its path:
+- both planes record codec id `zod/json@1`, backed by `jsonb`
+- the schema is stored as an opaque string, `additionalProperties: false` intact
+- nested bounds and enum members survived
 
-  ```
-  theme                       → Invalid option: expected one of "light"|"dark"
-  notifications.digestHour    → Too big
-  tags                        → Too big: expected array to have <=5 items
-  notifications               → Invalid input: expected object
-  ```
+`fixture/live-write-validation.mts`, against the live database:
 
-- `SELECT count(*)` returns **1**. The rejected writes never reached the database — which is the whole
-  claim this package makes over validating on read alone.
+- a valid object writes
+- seven invalid writes are each rejected **at encode**, naming their path — including
+  `notifications.digestHour` and an undeclared key
+- exactly one row was added: the rejected writes never landed
+- the stored row reads back through decode
 
-## Running it
+## The negative control
+
+CI then flips the column to `validateOnWrite: false` and **requires the check to fail**. A test that
+cannot fail proves nothing — and this one silently could not. It reported 8/8 with validation disabled,
+which is how the transport bugs below were found.
+
+## What that flushed out
+
+`prisma-next contract emit` walks type params and drops every boolean `false`, recursively. Measured on
+0.16.0 with probe values: `'off'`, `true` and `0` all survived; only `false` disappeared.
+
+- `additionalProperties: false` was stripped out of the stored JSON Schema, so the rehydrated validator
+  came back **loose** and the column silently accepted and persisted undeclared keys.
+- `validateOnWrite: false` was dropped, so the documented opt-out did nothing.
+
+Fixed by storing the schema as a JSON string the walk cannot descend into, and encoding the opt-out as
+a truthy `writeValidation: 'off'` — so a marker lost in transit leaves validation on rather than off.
+
+## Running it locally
 
 ```sh
-docker run -d --name pnzj-pg -e POSTGRES_PASSWORD=pg -e POSTGRES_DB=pnzj -p 55433:5432 postgres:16-alpine
+docker run -d --name pnzj-pg -e POSTGRES_PASSWORD=pg -e POSTGRES_DB=pnzj -p 55434:5432 postgres:16-alpine
+pnpm build                       # from the repo root; the fixture links to dist/
 
-pnpm build
-cd <a prisma-next postgres project>
-pnpm link <path to this repo>
-pnpm add zod
+cd e2e/fixture
+echo 'DATABASE_URL=postgresql://postgres:pg@localhost:55434/pnzj' > .env
+pnpm install
+pnpm emit && node ../assert-contract.mjs
+pnpm db:init
+pnpm check
 ```
 
-Copy `contract.example.ts` over `src/prisma/contract.ts` and `prisma-next.config.example.ts` over
-`prisma-next.config.ts` — between them they show all three registrations. Then:
-
-```sh
-echo 'DATABASE_URL=postgresql://postgres:pg@localhost:55433/pnzj' > .env
-pnpm contract:emit
-npx prisma-next db init
-npx tsx live-write-validation.mts
-```
+Re-runnable: each run scopes its own ids and asserts on the row delta, so no truncation step and no
+`psql` needed.
 
 ## Gotchas worth knowing
 
