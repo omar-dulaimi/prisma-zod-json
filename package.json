@@ -1,0 +1,48 @@
+{
+  "name": "prisma-next-zod-json",
+  "version": "0.1.0",
+  "description": "Typed JSON columns for Prisma Next, described and enforced by zod. Implements the zod/json@1 codec.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "private": true,
+  "dependencies": {
+    "@prisma-next/contract": "0.16.0",
+    "@prisma-next/contract-authoring": "0.16.0",
+    "@prisma-next/family-sql": "0.16.0",
+    "@prisma-next/framework-components": "0.16.0",
+    "@prisma-next/sql-relational-core": "0.16.0",
+    "@prisma-next/sql-runtime": "0.16.0",
+    "@standard-schema/spec": "^1.1.0"
+  },
+  "peerDependencies": {
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@prisma-next/sql-contract": "0.16.0",
+    "@types/node": "22.19.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10",
+    "zod": "4.4.3"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    "./codec-types": "./dist/codec-types.mjs",
+    "./codecs": "./dist/codecs.mjs",
+    "./column-types": "./dist/column-types.mjs",
+    "./control": "./dist/control.mjs",
+    "./pack": "./dist/pack.mjs",
+    "./runtime": "./dist/runtime.mjs",
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  }
+}
