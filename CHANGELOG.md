@@ -1,3 +1,13 @@
+## [0.1.1](https://github.com/omar-dulaimi/prisma-next-zod-json/compare/v0.1.0...v0.1.1) (2026-07-27)
+
+### 🐛 Bug Fixes
+
+* stop the failure message repeating the field path ([de80eab](https://github.com/omar-dulaimi/prisma-next-zod-json/commit/de80eabb255c2c36ab1f6755010e39350c36ff2d))
+
+### 📚 Documentation
+
+* reword the design doc for a public audience ([ad97f7c](https://github.com/omar-dulaimi/prisma-next-zod-json/commit/ad97f7caf756179463bc3ee866f559664ae0e8d3))
+
 ## [0.1.0](https://github.com/omar-dulaimi/prisma-next-zod-json/compare/v0.0.0...v0.1.0) (2026-07-27)
 
 ### 🚀 Features

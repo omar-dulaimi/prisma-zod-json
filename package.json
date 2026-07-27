@@ -1,6 +1,6 @@
 {
   "name": "prisma-next-zod-json",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Typed JSON columns for Prisma Next, described and enforced by zod. Implements the zod/json@1 codec.",
   "license": "MIT",
   "type": "module",
