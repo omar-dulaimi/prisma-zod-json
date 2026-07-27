@@ -1,6 +1,7 @@
 # zod/json@1 — a typed JSON column for Prisma Next, validated by zod
 
-Design doc. Private repo, private work.
+Design doc, written before implementation and kept as a record of the decisions and the measurements
+behind them.
 
 ## What this is
 
@@ -62,9 +63,9 @@ Four constructs round-trip **without throwing and without working**:
 throws.
 
 So the naive implementation of this package — serialise, rehydrate, validate — hands somebody a
-column that enforces *nothing* of their refinement, and never says so. That is precisely the
-looks-protected-but-isn't failure this codebase's author has spent a month removing from another
-product. Shipping it would be worse than shipping nothing.
+column that enforces *nothing* of their refinement, and never says so. A validator that appears to
+protect and does not is worse than no validator: it moves the error away from the code that caused it
+and buys false confidence in between. Shipping that would be worse than shipping nothing.
 
 **We detect it and refuse at authoring time.** Zod won't tell us, but its def tree will:
 `_zod.def.checks[]._zod.def.check === 'custom'` marks a refinement, and `_zod.def.type === 'catch'`
