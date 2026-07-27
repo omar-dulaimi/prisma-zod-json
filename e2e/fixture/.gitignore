@@ -2,3 +2,4 @@ node_modules/
 src/prisma/contract.json
 src/prisma/contract.d.ts
 .env
+migrations/

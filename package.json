@@ -25,7 +25,11 @@
     "@prisma-next/sql-contract": "0.16.0",
     "@prisma-next/sql-relational-core": "0.16.0",
     "@prisma-next/sql-runtime": "0.16.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "22.19.0",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "semantic-release": "^24.2.9",
     "tsdown": "0.22.8",
     "typescript": "5.9.3",
     "vitest": "4.1.10",
@@ -66,9 +70,11 @@
     "node": ">=24"
   },
   "scripts": {
+    "build": "tsdown",
+    "release": "semantic-release",
     "test": "vitest run",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "build": "tsdown"
+    "verify:package": "node scripts/verify-package.mjs"
   },
   "author": "Omar Dulaimi",
   "repository": {

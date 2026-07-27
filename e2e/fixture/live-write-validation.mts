@@ -42,11 +42,13 @@ function record(ok: boolean, detail: string): void {
   if (!ok) failures.push(detail);
 }
 
-const idFor = (n: number) => String(n).padStart(36, '0');
+// Run-scoped, so the script can be re-run locally against a database that already has rows.
+const run = process.env['E2E_RUN_ID'] ?? String(Date.now());
+const idFor = (n: number) => `${run}-${n}`.padStart(36, '0').slice(-36);
 
 async function expectAccepted(label: string, settings: unknown, n: number): Promise<void> {
   try {
-    await accounts.create({ id: idFor(n), email: `user${n}@example.test`, settings });
+    await accounts.create({ id: idFor(n), email: `user${n}.${run}@example.test`, settings });
     record(true, label);
   } catch (error) {
     record(false, `${label} — rejected a valid value: ${(error as Error).message.split('\n')[0]}`);
@@ -56,7 +58,7 @@ async function expectAccepted(label: string, settings: unknown, n: number): Prom
 /** Rejection alone is not enough: the message must name the path, or the caller cannot act on it. */
 async function expectRejectedAt(label: string, settings: unknown, path: string, n: number): Promise<void> {
   try {
-    await accounts.create({ id: idFor(n), email: `user${n}@example.test`, settings });
+    await accounts.create({ id: idFor(n), email: `user${n}.${run}@example.test`, settings });
     record(false, `${label} — the write was ACCEPTED; invalid data reached the database`);
   } catch (error) {
     const message = (error as Error).message;
@@ -70,6 +72,8 @@ async function expectRejectedAt(label: string, settings: unknown, path: string, 
     );
   }
 }
+
+const before = (await accounts.all()).length;
 
 await expectAccepted('a valid settings object is stored', valid, 1);
 
@@ -91,11 +95,12 @@ await expectRejectedAt('an undeclared key', { ...valid, sneaky: 'value' }, 'snea
 
 // The whole point of validating on write: the rejected rows must not be in the table.
 const rows = await accounts.all();
-record(rows.length === 1, `exactly one row committed (found ${rows.length}) — rejected writes never landed`);
+const added = rows.length - before;
+record(added === 1, `exactly one row committed (added ${added}) — the six rejected writes never landed`);
 
 // And what did land must survive a read, proving decode accepts what encode produced.
-const [row] = rows as { settings?: { theme?: string } }[];
-record(row?.settings?.theme === 'dark', 'the stored row reads back through decode intact');
+const stored = (rows as { id?: string; settings?: { theme?: string } }[]).find((r) => r.id === idFor(1));
+record(stored?.settings?.theme === 'dark', 'the stored row reads back through decode intact');
 
 await client.close();
 

@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: '24.x'
+  PNPM_VERSION: '10.33.2'
+
+jobs:
+  verify:
+    name: Typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify the published entrypoints resolve
+        # Exercises the real tarball, not the source tree: an exports-map mistake is invisible
+        # until someone installs the package.
+        run: pnpm verify:package
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  e2e:
+    name: End-to-end against Postgres
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: pg
+          POSTGRES_DB: pnzj
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:pg@localhost:5432/pnzj
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build the package the fixture links to
+        run: pnpm build
+
+      - name: Install the fixture project
+        working-directory: e2e/fixture
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Emit the contract
+        working-directory: e2e/fixture
+        run: pnpm emit
+
+      - name: Assert the codec reached both contract planes
+        working-directory: e2e/fixture
+        run: node ../assert-contract.mjs
+
+      - name: Create the database from the contract
+        working-directory: e2e/fixture
+        run: pnpm db:init
+
+      - name: Invalid writes must be rejected before they reach the table
+        working-directory: e2e/fixture
+        run: pnpm check
+
+      - name: Negative control — the check must fail when validation is off
+        working-directory: e2e/fixture
+        # A test that cannot fail proves nothing. Disabling write validation has to break it.
+        run: |
+          set -euo pipefail
+          sed -i 's/zodJson(Settings)/zodJson(Settings, { validateOnWrite: false })/' src/prisma/contract.ts
+          pnpm emit >/dev/null
+          pnpm db:init >/dev/null
+          if pnpm check >/dev/null 2>&1; then
+            echo "::error::The e2e check passed with write validation disabled — it is not testing what it claims."
+            exit 1
+          fi
+          echo "Negative control behaved correctly: the check fails when validation is off."
+          git checkout -- src/prisma/contract.ts

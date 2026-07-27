@@ -1,5 +1,8 @@
 # prisma-next-zod-json
 
+[![CI](https://github.com/omar-dulaimi/prisma-next-zod-json/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-dulaimi/prisma-next-zod-json/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/prisma-next-zod-json.svg)](https://www.npmjs.com/package/prisma-next-zod-json)
+
 Typed JSON columns for [Prisma Next](https://github.com/prisma/prisma-next), described and enforced by
 [zod](https://zod.dev). Implements the `zod/json@1` codec.
 
