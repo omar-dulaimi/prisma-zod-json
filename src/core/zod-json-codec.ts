@@ -44,15 +44,50 @@ export type ZodJsonParams = ZodJsonTypeParams & {
   readonly writeValidation?: 'off' | undefined;
 };
 
+type Issue = z.core.$ZodIssue;
+type UnionIssue = Issue & { errors: readonly (readonly Issue[])[] };
+
+const isUnionIssue = (issue: Issue): issue is UnionIssue =>
+  issue.code === 'invalid_union' && Array.isArray((issue as UnionIssue).errors);
+
+/**
+ * Replaces a union failure with the failures of the branch that came closest.
+ *
+ * `fromJSONSchema` rebuilds `oneOf` as a plain union, so a discriminated union loses its discriminator
+ * and every branch is tried. The top-level issue is then a bare "Invalid input" naming nothing, while
+ * the useful detail sits in `issue.errors`, one entry per branch.
+ *
+ * Fewest issues wins: the branch whose discriminator matched fails only on the field that was really
+ * wrong, while the others fail on the discriminator as well. When nothing matched, every branch
+ * reports its discriminator, which is still the right thing to show.
+ */
+function flattenIssues(issues: readonly Issue[]): readonly Issue[] {
+  return issues.flatMap((issue) => {
+    if (!isUnionIssue(issue)) return [issue];
+
+    const branches = issue.errors.filter((branch) => branch.length > 0);
+    if (branches.length === 0) return [issue];
+
+    const closest = branches.reduce((best, branch) => (branch.length < best.length ? branch : best));
+    // Union issues nest, so a union inside a branch resolves the same way.
+    const resolved = flattenIssues(closest);
+    // Keep the outer path: a union nested under a field must still report that field.
+    return issue.path.length === 0
+      ? resolved
+      : resolved.map((inner) => ({ ...inner, path: [...issue.path, ...inner.path] }));
+  });
+}
+
 function fail(phase: 'encode' | 'decode', error: z.ZodError): never {
-  const first = error.issues[0];
+  const issues = flattenIssues(error.issues);
+  const first = issues[0];
   const at = first && first.path.length > 0 ? ` at \`${first.path.join('.')}\`` : '';
   throw runtimeError(
     'RUNTIME.JSON_SCHEMA_VALIDATION_FAILED',
-    `zod/json schema validation failed (${phase})${at}: ${error.issues
+    `zod/json schema validation failed (${phase})${at}: ${issues
       .map((i) => `${i.path.join('.') || '(root)'} — ${i.message}`)
       .join('; ')}`,
-    { codecId: ZOD_JSON_CODEC_ID, phase, issues: error.issues },
+    { codecId: ZOD_JSON_CODEC_ID, phase, issues },
   );
 }
 
