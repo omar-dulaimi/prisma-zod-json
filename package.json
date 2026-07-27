@@ -5,21 +5,26 @@
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
-  "private": true,
   "dependencies": {
+    "@standard-schema/spec": "^1.1.0"
+  },
+  "peerDependencies": {
+    "@prisma-next/contract": "^0.16.0",
+    "@prisma-next/contract-authoring": "^0.16.0",
+    "@prisma-next/family-sql": "^0.16.0",
+    "@prisma-next/framework-components": "^0.16.0",
+    "@prisma-next/sql-relational-core": "^0.16.0",
+    "@prisma-next/sql-runtime": "^0.16.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
     "@prisma-next/contract": "0.16.0",
     "@prisma-next/contract-authoring": "0.16.0",
     "@prisma-next/family-sql": "0.16.0",
     "@prisma-next/framework-components": "0.16.0",
+    "@prisma-next/sql-contract": "0.16.0",
     "@prisma-next/sql-relational-core": "0.16.0",
     "@prisma-next/sql-runtime": "0.16.0",
-    "@standard-schema/spec": "^1.1.0"
-  },
-  "peerDependencies": {
-    "zod": "^4.1.0"
-  },
-  "devDependencies": {
-    "@prisma-next/sql-contract": "0.16.0",
     "@types/node": "22.19.0",
     "tsdown": "0.22.8",
     "typescript": "5.9.3",
@@ -64,5 +69,25 @@
     "test": "vitest run",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "build": "tsdown"
-  }
+  },
+  "author": "Omar Dulaimi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omar-dulaimi/prisma-next-zod-json.git"
+  },
+  "homepage": "https://github.com/omar-dulaimi/prisma-next-zod-json#readme",
+  "bugs": {
+    "url": "https://github.com/omar-dulaimi/prisma-next-zod-json/issues"
+  },
+  "keywords": [
+    "prisma",
+    "prisma-next",
+    "zod",
+    "json-schema",
+    "codec",
+    "jsonb",
+    "validation",
+    "postgres",
+    "extension"
+  ]
 }

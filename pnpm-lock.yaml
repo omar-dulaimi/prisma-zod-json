@@ -8,6 +8,10 @@ importers:
 
   .:
     dependencies:
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
+    devDependencies:
       '@prisma-next/contract':
         specifier: 0.16.0
         version: 0.16.0(typescript@5.9.3)
@@ -20,17 +24,13 @@ importers:
       '@prisma-next/framework-components':
         specifier: 0.16.0
         version: 0.16.0(typescript@5.9.3)
+      '@prisma-next/sql-contract':
+        specifier: 0.16.0
+        version: 0.16.0(typescript@5.9.3)
       '@prisma-next/sql-relational-core':
         specifier: 0.16.0
         version: 0.16.0(typescript@5.9.3)
       '@prisma-next/sql-runtime':
-        specifier: 0.16.0
-        version: 0.16.0(typescript@5.9.3)
-      '@standard-schema/spec':
-        specifier: ^1.1.0
-        version: 1.1.0
-    devDependencies:
-      '@prisma-next/sql-contract':
         specifier: 0.16.0
         version: 0.16.0(typescript@5.9.3)
       '@types/node':
