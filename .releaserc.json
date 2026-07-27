@@ -1,5 +1,7 @@
 {
   "branches": ["main"],
+  "//": "Set explicitly: package.json uses npm's `git+https://` form, which @semantic-release/github parses into an empty $owner.",
+  "repositoryUrl": "https://github.com/omar-dulaimi/prisma-next-zod-json.git",
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
