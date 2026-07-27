@@ -21,6 +21,7 @@
   "devDependencies": {
     "@prisma-next/sql-contract": "0.16.0",
     "@types/node": "22.19.0",
+    "tsdown": "0.22.8",
     "typescript": "5.9.3",
     "vitest": "4.1.10",
     "zod": "4.4.3"
@@ -30,12 +31,30 @@
     "src"
   ],
   "exports": {
-    "./codec-types": "./dist/codec-types.mjs",
-    "./codecs": "./dist/codecs.mjs",
-    "./column-types": "./dist/column-types.mjs",
-    "./control": "./dist/control.mjs",
-    "./pack": "./dist/pack.mjs",
-    "./runtime": "./dist/runtime.mjs",
+    "./codec-types": {
+      "types": "./dist/codec-types.d.mts",
+      "default": "./dist/codec-types.mjs"
+    },
+    "./codecs": {
+      "types": "./dist/codecs.d.mts",
+      "default": "./dist/codecs.mjs"
+    },
+    "./column-types": {
+      "types": "./dist/column-types.d.mts",
+      "default": "./dist/column-types.mjs"
+    },
+    "./control": {
+      "types": "./dist/control.d.mts",
+      "default": "./dist/control.mjs"
+    },
+    "./pack": {
+      "types": "./dist/pack.d.mts",
+      "default": "./dist/pack.mjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.mts",
+      "default": "./dist/runtime.mjs"
+    },
     "./package.json": "./package.json"
   },
   "engines": {
@@ -43,6 +62,7 @@
   },
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --project tsconfig.json --noEmit"
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "build": "tsdown"
   }
 }

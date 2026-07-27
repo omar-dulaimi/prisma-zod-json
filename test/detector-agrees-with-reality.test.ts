@@ -17,6 +17,10 @@ const probes: unknown[] = [
   '',
   'a@b.co',
   'https://a.co',
+  'prefix',
+  'suffix',
+  'ab',
+  'abcd',
   '2020-01-01T00:00:00Z',
   0,
   1,
@@ -37,8 +41,14 @@ const probes: unknown[] = [
 ];
 
 const corpus: [name: string, schema: z.ZodType][] = [
+  // Every entry here is a construct the README lists as surviving. Adding a claim there means adding
+  // a case here.
   ['string', z.string()],
   ['string.min', z.string().min(2)],
+  ['string.max', z.string().max(3)],
+  ['string.length', z.string().length(2)],
+  ['string.startsWith', z.string().startsWith('pre')],
+  ['string.endsWith', z.string().endsWith('fix')],
   ['string.regex', z.string().regex(/^a+$/)],
   ['email', z.email()],
   ['url', z.url()],
@@ -61,6 +71,7 @@ const corpus: [name: string, schema: z.ZodType][] = [
   ['array', z.array(z.string())],
   ['array bounds', z.array(z.string()).min(1).max(2)],
   ['tuple', z.tuple([z.string(), z.number()])],
+  ['tuple with rest', z.tuple([z.string()], z.number())],
   ['union', z.union([z.string(), z.number()])],
   ['record', z.record(z.string(), z.number())],
   ['intersection', z.intersection(z.object({ a: z.string() }), z.object({ b: z.number() }))],
