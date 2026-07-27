@@ -11,10 +11,12 @@ import { findUnrepresentable, type Unrepresentable } from './representability.js
 /** Bumped only if the stored shape changes in a way older readers cannot interpret. */
 export const TYPE_PARAMS_VERSION = 1;
 
-export interface ZodJsonTypeParams {
+// A type alias rather than an interface: TypeScript gives aliases an implicit index signature, which
+// `ColumnSpec`'s `Record<string, unknown>` constraint on type params requires.
+export type ZodJsonTypeParams = {
   readonly version: number;
   readonly jsonSchema: Record<string, unknown>;
-}
+};
 
 export interface SerializeOptions {
   /**

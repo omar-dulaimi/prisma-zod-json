@@ -7,6 +7,7 @@
  */
 import type { JsonValue } from '@prisma-next/contract/types';
 import {
+  type AnyCodecDescriptor,
   type CodecCallContext,
   CodecDescriptorImpl,
   CodecImpl,
@@ -26,10 +27,10 @@ export const ZOD_JSON_CODEC_ID = 'zod/json@1' as const;
 const ZOD_JSON_NATIVE_TYPE = 'jsonb' as const;
 const ZOD_JSON_META = { db: { sql: { postgres: { nativeType: ZOD_JSON_NATIVE_TYPE } } } } as const;
 
-/** Type params as stored in the contract. `validateOnWrite` defaults to on, so it is stored only when disabled. */
-export interface ZodJsonParams extends ZodJsonTypeParams {
-  readonly validateOnWrite?: boolean;
-}
+/** Type params as stored in the contract. Absent `validateOnWrite` reads as on. */
+export type ZodJsonParams = ZodJsonTypeParams & {
+  readonly validateOnWrite?: boolean | undefined;
+};
 
 function fail(phase: 'encode' | 'decode', error: z.ZodError): never {
   const first = error.issues[0];
@@ -177,3 +178,6 @@ export function zodJson<S extends z.ZodType>(
 }
 
 zodJson satisfies ColumnHelperFor<ZodJsonDescriptor>;
+
+/** Every codec descriptor this package ships. */
+export const codecDescriptors: readonly AnyCodecDescriptor[] = [zodJsonDescriptor];
