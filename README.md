@@ -65,12 +65,16 @@ export default definePrismaConfig({
 });
 ```
 
-**Runtime**: where you construct the client:
+**Runtime**: where you construct the client. Pass your emitted `Contract` type explicitly so the client
+is fully typed, not `unknown`:
 
 ```ts
+import postgres from '@prisma/orm-postgres/runtime';
 import { zodJsonRuntimeDescriptor } from 'prisma-orm-extension-zod-json/runtime';
+import type { Contract } from './contract.d';
+import contractJson from './contract.json' with { type: 'json' };
 
-export const db = postgres({ contractJson, url, extensions: [zodJsonRuntimeDescriptor] });
+export const db = postgres<Contract>({ contractJson, url, extensions: [zodJsonRuntimeDescriptor] });
 ```
 
 Miss one and you get a clear error naming what is absent, not silent misbehaviour.

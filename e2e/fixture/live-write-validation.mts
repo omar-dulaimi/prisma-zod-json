@@ -10,20 +10,16 @@ import postgres from '@prisma/orm-postgres/runtime';
 // Registration 3 of 3: the runtime plane. Without it, constructing the client fails with
 // "no contributor registered a codec descriptor for that codecId".
 import { zodJsonRuntimeDescriptor } from 'prisma-orm-extension-zod-json/runtime';
+import type { Contract } from './src/prisma/contract.d';
 import contractJson from './src/prisma/contract.json' with { type: 'json' };
 
-type Account = { create(data: unknown): Promise<unknown>; all(): Promise<unknown[]> };
-
-const client = postgres({
+const client = postgres<Contract>({
   contractJson,
   url: process.env['DATABASE_URL']!,
   extensions: [zodJsonRuntimeDescriptor],
-} as never) as never as {
-  // Models hang off the namespace facet, not the client root.
-  orm: { public: { Account: Account } };
-  close(): Promise<void>;
-};
+});
 
+// Models hang off the namespace facet, not the client root.
 const accounts = client.orm.public.Account;
 
 const valid = {
@@ -48,7 +44,10 @@ const idFor = (n: number) => `${run}-${n}`.padStart(36, '0').slice(-36);
 
 async function expectAccepted(label: string, settings: unknown, n: number): Promise<void> {
   try {
-    await accounts.create({ id: idFor(n), email: `user${n}.${run}@example.test`, settings });
+    // Every case here is intentionally-shaped test data, some of it deliberately invalid - that's the
+    // point of this file. The cast is scoped to this one call, not the client, so a typo elsewhere
+    // (`.al()`, a wrong field name) still fails to compile.
+    await accounts.create({ id: idFor(n), email: `user${n}.${run}@example.test`, settings } as never);
     record(true, label);
   } catch (error) {
     record(false, `${label}: rejected a valid value: ${(error as Error).message.split('\n')[0]}`);
@@ -58,7 +57,7 @@ async function expectAccepted(label: string, settings: unknown, n: number): Prom
 /** Rejection alone is not enough: the message must name the path, or the caller cannot act on it. */
 async function expectRejectedAt(label: string, settings: unknown, path: string, n: number): Promise<void> {
   try {
-    await accounts.create({ id: idFor(n), email: `user${n}.${run}@example.test`, settings });
+    await accounts.create({ id: idFor(n), email: `user${n}.${run}@example.test`, settings } as never);
     record(false, `${label}: the write was ACCEPTED; invalid data reached the database`);
   } catch (error) {
     const message = (error as Error).message;
@@ -99,7 +98,7 @@ const added = rows.length - before;
 record(added === 1, `exactly one row committed (added ${added}): the six rejected writes never landed`);
 
 // And what did land must survive a read, proving decode accepts what encode produced.
-const stored = (rows as { id?: string; settings?: { theme?: string } }[]).find((r) => r.id === idFor(1));
+const stored = rows.find((r) => r.id === idFor(1));
 record(stored?.settings?.theme === 'dark', 'the stored row reads back through decode intact');
 
 await client.close();
