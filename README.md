@@ -3,8 +3,16 @@
 [![CI](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/prisma-orm-extension-zod-json.svg)](https://www.npmjs.com/package/prisma-orm-extension-zod-json)
 
-Typed JSON columns for [Prisma](https://github.com/prisma/prisma), described and enforced by
-[zod](https://zod.dev). Implements the `zod/json@1` codec.
+JSON columns validated by a [zod](https://zod.dev) schema: a
+[Prisma 8 extension](https://www.prisma.io/docs/orm/v8/extensions/using-extensions) implementing the
+`zod/json@1` codec.
+
+An extension is a package that adds a database capability Prisma 8 does not have out of the box, while
+keeping the Prisma 8 experience: typed schema declarations, generated TypeScript, migration support, and
+query helpers that feel native to your app. Prisma's own catalog covers vector search (pgvector),
+geospatial data (PostGIS), full-text search (ParadeDB), and arktype-validated JSON; this package adds
+the zod half of typed JSON. Declare a `jsonb` column whose contents are described and enforced by a zod
+schema:
 
 ```ts
 const Settings = z.object({
@@ -22,36 +30,27 @@ Account: model('Account', {
 ```
 
 The schema is serialised to JSON Schema when you author the column, travels in the contract, and is
-rebuilt into a validator at runtime.
+rebuilt into a validator at runtime. Like every Prisma 8 extension it is one package with a registration
+in the config and one on the client, and the bookkeeping exists to fail early: a contract that needs
+this extension with a client that does not register it fails when the client is constructed, never at
+query time with the extension half wired.
 
-## Install
+## 1. Install the package
 
 ```sh
-npm install prisma-orm-extension-zod-json zod
+npm install prisma-orm-extension-zod-json
 ```
 
-Requires `@prisma/orm-postgres@8.0.0-rc.4` (or another Prisma v8 RC Postgres target). `zod` is bundled
-as a regular dependency, not something you install separately.
+`zod` ships as a regular dependency of this package. Your application needs
+`@prisma/orm-postgres@8.0.0-rc.4`; this package's version always matches the Prisma release it targets
+(see Versioning below), so keep the two aligned.
 
-## Registration
+## 2. Register it in the config
 
-Three planes, three registrations. All three are needed: the contract plane to author the column, the
-control plane to create the table, the runtime plane to read and write it.
-
-**Contract**: in the object your `defineContract` callback returns, next to `models`:
+Prisma 8 uses this registration when it emits your contract and plans migrations:
 
 ```ts
-import zodJsonPack from 'prisma-orm-extension-zod-json/pack';
-
-export const contract = defineContract({}, ({ field, model }) => ({
-  extensions: { zodJson: zodJsonPack },
-  models: { /* … */ },
-}));
-```
-
-**Control**: in `prisma.config.ts`, so `db init` and migrations know the column:
-
-```ts
+// prisma.config.ts
 import { definePrismaConfig } from '@prisma/cli-engine';
 import { defineConfig as ormConfig } from '@prisma/orm-postgres/config';
 import { zodJsonExtensionDescriptor } from 'prisma-orm-extension-zod-json/control';
@@ -65,10 +64,14 @@ export default definePrismaConfig({
 });
 ```
 
-**Runtime**: where you construct the client. Pass your emitted `Contract` type explicitly so the client
-is fully typed, not `unknown`:
+## 3. Register it on the client
+
+Prisma 8 uses this registration when your app runs queries: it provides the codec that validates and
+decodes your columns. Pass your emitted `Contract` type explicitly so the client is fully typed, not
+`unknown`:
 
 ```ts
+// src/prisma/db.ts
 import postgres from '@prisma/orm-postgres/runtime';
 import { zodJsonRuntimeDescriptor } from 'prisma-orm-extension-zod-json/runtime';
 import type { Contract } from './contract.d';
@@ -77,7 +80,40 @@ import contractJson from './contract.json' with { type: 'json' };
 export const db = postgres<Contract>({ contractJson, url, extensions: [zodJsonRuntimeDescriptor] });
 ```
 
-Miss one and you get a clear error naming what is absent, not silent misbehaviour.
+## 4. Use it in your contract
+
+This package targets contracts authored with the TypeScript builder. Add the pack in the object your
+`defineContract` callback returns, next to `models`, then declare columns with `zodJson(schema)`:
+
+```ts
+import { defineContract } from '@prisma/orm-postgres/contract-builder';
+import { zodJson } from 'prisma-orm-extension-zod-json/column-types';
+import zodJsonPack from 'prisma-orm-extension-zod-json/pack';
+
+export const contract = defineContract({}, ({ field, model }) => ({
+  extensions: { zodJson: zodJsonPack },
+  models: {
+    Account: model('Account', {
+      fields: {
+        id: field.id.uuidv7String(),
+        settings: field.column(zodJson(Settings)),
+      },
+    }),
+  },
+}));
+```
+
+## 5. Apply and query
+
+```sh
+npx prisma contract emit
+npx prisma db init
+```
+
+`contract emit` stores the JSON Schema in `contract.json` and renders the column's TypeScript type into
+`contract.d.ts`. `db init` (or `db update` on an existing database) creates the `jsonb` column. From
+there every write and read of the column validates against the schema, and a missing registration
+surfaces as a clear error naming what is absent, not silent misbehaviour.
 
 ## Two things this does differently
 
@@ -150,11 +186,11 @@ exactly.
 `{ theme: "light" | "dark"; tags: Array<string> }` rather than `unknown`. Anything it cannot name renders
 as `unknown`: a wrong type is worse than an honest one.
 
-## Status
-
-Early. Tracks the Prisma v8 release-candidate line; still moving.
+## Versioning and status
 
 Versions mirror the Prisma release this package targets, the same convention Prisma's own extensions
 use: installing `prisma-orm-extension-zod-json@8.0.0-rc.4` gets you the build for Prisma `8.0.0-rc.4`.
 A fix released between Prisma versions appends a counter (`8.0.0-rc.4.1`), which semver orders after
 its base and before the next Prisma release.
+
+Early; tracks the Prisma v8 release-candidate line, which is still moving.
