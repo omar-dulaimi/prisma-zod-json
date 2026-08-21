@@ -1,7 +1,7 @@
-# prisma-zod-json
+# prisma-orm-extension-zod-json
 
-[![CI](https://github.com/omar-dulaimi/prisma-zod-json/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-dulaimi/prisma-zod-json/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/prisma-zod-json.svg)](https://www.npmjs.com/package/prisma-zod-json)
+[![CI](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/prisma-orm-extension-zod-json.svg)](https://www.npmjs.com/package/prisma-orm-extension-zod-json)
 
 Typed JSON columns for [Prisma](https://github.com/prisma/prisma), described and enforced by
 [zod](https://zod.dev). Implements the `zod/json@1` codec.
@@ -27,7 +27,7 @@ rebuilt into a validator at runtime.
 ## Install
 
 ```sh
-npm install prisma-zod-json zod
+npm install prisma-orm-extension-zod-json zod
 ```
 
 Requires `@prisma/orm-postgres@8.0.0-rc.4` (or another Prisma v8 RC Postgres target). `zod` is bundled
@@ -41,7 +41,7 @@ control plane to create the table, the runtime plane to read and write it.
 **Contract**: in the object your `defineContract` callback returns, next to `models`:
 
 ```ts
-import zodJsonPack from 'prisma-zod-json/pack';
+import zodJsonPack from 'prisma-orm-extension-zod-json/pack';
 
 export const contract = defineContract({}, ({ field, model }) => ({
   extensions: { zodJson: zodJsonPack },
@@ -54,7 +54,7 @@ export const contract = defineContract({}, ({ field, model }) => ({
 ```ts
 import { definePrismaConfig } from '@prisma/cli-engine';
 import { defineConfig as ormConfig } from '@prisma/orm-postgres/config';
-import { zodJsonExtensionDescriptor } from 'prisma-zod-json/control';
+import { zodJsonExtensionDescriptor } from 'prisma-orm-extension-zod-json/control';
 
 export default definePrismaConfig({
   orm: ormConfig({
@@ -65,12 +65,16 @@ export default definePrismaConfig({
 });
 ```
 
-**Runtime**: where you construct the client:
+**Runtime**: where you construct the client. Pass your emitted `Contract` type explicitly so the client
+is fully typed, not `unknown`:
 
 ```ts
-import { zodJsonRuntimeDescriptor } from 'prisma-zod-json/runtime';
+import postgres from '@prisma/orm-postgres/runtime';
+import { zodJsonRuntimeDescriptor } from 'prisma-orm-extension-zod-json/runtime';
+import type { Contract } from './contract.d';
+import contractJson from './contract.json' with { type: 'json' };
 
-export const db = postgres({ contractJson, url, extensions: [zodJsonRuntimeDescriptor] });
+export const db = postgres<Contract>({ contractJson, url, extensions: [zodJsonRuntimeDescriptor] });
 ```
 
 Miss one and you get a clear error naming what is absent, not silent misbehaviour.
