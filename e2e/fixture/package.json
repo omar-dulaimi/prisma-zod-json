@@ -1,5 +1,5 @@
 {
-  "name": "prisma-zod-json-e2e-fixture",
+  "name": "prisma-orm-extension-zod-json-e2e-fixture",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
     "@prisma/orm-postgres": "8.0.0-rc.4",
     "dotenv": "^17.0.0",
     "prisma": "8.0.0-rc.7",
-    "prisma-zod-json": "link:../..",
+    "prisma-orm-extension-zod-json": "link:../..",
     "tsx": "^4.20.0",
     "zod": "4.4.3"
   }

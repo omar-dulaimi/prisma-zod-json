@@ -37,7 +37,7 @@ describe('pack metadata', () => {
 
   test('points the emitter at a codec-types entrypoint that this package actually exports', () => {
     const { package: pkg } = zodJsonPackMeta.types.codecTypes.import;
-    const subpath = `.${pkg.replace('prisma-zod-json', '')}`;
+    const subpath = `.${pkg.replace('prisma-orm-extension-zod-json', '')}`;
 
     expect(Object.keys((packageJson as { exports: Record<string, unknown> }).exports)).toContain(subpath);
   });

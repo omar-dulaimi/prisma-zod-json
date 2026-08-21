@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { definePrismaConfig } from '@prisma/cli-engine';
 import { defineConfig as ormConfig } from '@prisma/orm-postgres/config';
-import { zodJsonExtensionDescriptor } from 'prisma-zod-json/control';
+import { zodJsonExtensionDescriptor } from 'prisma-orm-extension-zod-json/control';
 
 export default definePrismaConfig({
   orm: ormConfig({

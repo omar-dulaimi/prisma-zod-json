@@ -1,5 +1,5 @@
 {
-  "name": "prisma-zod-json",
+  "name": "prisma-orm-extension-zod-json",
   "version": "2.0.0",
   "description": "Typed JSON columns for Prisma, described and enforced by zod. Implements the zod/json@1 codec.",
   "license": "MIT",
@@ -80,11 +80,11 @@
   "author": "Omar Dulaimi",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/omar-dulaimi/prisma-zod-json.git"
+    "url": "git+https://github.com/omar-dulaimi/prisma-orm-extension-zod-json.git"
   },
-  "homepage": "https://github.com/omar-dulaimi/prisma-zod-json#readme",
+  "homepage": "https://github.com/omar-dulaimi/prisma-orm-extension-zod-json#readme",
   "bugs": {
-    "url": "https://github.com/omar-dulaimi/prisma-zod-json/issues"
+    "url": "https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/issues"
   },
   "keywords": [
     "prisma",
