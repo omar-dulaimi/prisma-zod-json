@@ -1,3 +1,8 @@
+> From `8.0.0-rc.4` onward this package is versioned as the Prisma release it targets, and releases are
+> documented on the [GitHub Releases page](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/releases)
+> instead of this file. The `2.x`-`4.x` entries below are the retired independent versioning scheme;
+> `4.0.0` and `4.0.1` in particular carry no meaningful changes over `3.0.0`.
+
 ## [4.0.1](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/compare/v4.0.0...v4.0.1) (2026-08-21)
 
 ## [4.0.0](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/compare/v3.0.0...v4.0.0) (2026-08-21)

@@ -1,6 +1,6 @@
 {
   "name": "prisma-orm-extension-zod-json",
-  "version": "4.0.1",
+  "version": "0.0.0-managed",
   "description": "Typed JSON columns for Prisma, described and enforced by zod. Implements the zod/json@1 codec.",
   "license": "MIT",
   "type": "module",
@@ -22,15 +22,7 @@
   },
   "devDependencies": {
     "@prisma/orm-target-postgres": "8.0.0-rc.4",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^12.0.9",
-    "@semantic-release/npm": "^13.1.5",
-    "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/node": "22.19.0",
-    "conventional-changelog-conventionalcommits": "^9.3.1",
-    "semantic-release": "^25.0.8",
     "tsdown": "0.22.8",
     "typescript": "5.9.3",
     "vitest": "4.1.10",
@@ -72,7 +64,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "release": "semantic-release",
+    "release": "node scripts/release.mjs",
     "test": "vitest run",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "verify:package": "node scripts/verify-package.mjs"
