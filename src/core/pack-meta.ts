@@ -21,7 +21,7 @@ const zodJsonPackMetaBase = {
     codecTypes: {
       codecDescriptors: Array.from(zodJsonCodecRegistry.values()),
       import: {
-        package: 'prisma-next-zod-json/codec-types',
+        package: 'prisma-zod-json/codec-types',
         named: 'CodecTypes',
         alias: 'ZodJsonTypes',
       },

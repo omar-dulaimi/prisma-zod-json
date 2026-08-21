@@ -1,7 +1,7 @@
 {
-  "name": "prisma-next-zod-json",
+  "name": "prisma-zod-json",
   "version": "1.0.0",
-  "description": "Typed JSON columns for Prisma Next, described and enforced by zod. Implements the zod/json@1 codec.",
+  "description": "Typed JSON columns for Prisma, described and enforced by zod. Implements the zod/json@1 codec.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -80,15 +80,14 @@
   "author": "Omar Dulaimi",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/omar-dulaimi/prisma-next-zod-json.git"
+    "url": "git+https://github.com/omar-dulaimi/prisma-zod-json.git"
   },
-  "homepage": "https://github.com/omar-dulaimi/prisma-next-zod-json#readme",
+  "homepage": "https://github.com/omar-dulaimi/prisma-zod-json#readme",
   "bugs": {
-    "url": "https://github.com/omar-dulaimi/prisma-next-zod-json/issues"
+    "url": "https://github.com/omar-dulaimi/prisma-zod-json/issues"
   },
   "keywords": [
     "prisma",
-    "prisma-next",
     "zod",
     "json-schema",
     "codec",

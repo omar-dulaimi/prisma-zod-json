@@ -9,7 +9,7 @@ import 'dotenv/config';
 import postgres from '@prisma/orm-postgres/runtime';
 // Registration 3 of 3: the runtime plane. Without it, constructing the client fails with
 // "no contributor registered a codec descriptor for that codecId".
-import { zodJsonRuntimeDescriptor } from 'prisma-next-zod-json/runtime';
+import { zodJsonRuntimeDescriptor } from 'prisma-zod-json/runtime';
 import contractJson from './src/prisma/contract.json' with { type: 'json' };
 
 type Account = { create(data: unknown): Promise<unknown>; all(): Promise<unknown[]> };
