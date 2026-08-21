@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@prisma/orm-family-sql':
+        specifier: 8.0.0-rc.4
+        version: 8.0.0-rc.4(@prisma/cli-engine@0.2.0)(typanion@3.14.0)(typescript@5.9.3)(vite@8.1.5(@types/node@22.19.0)(esbuild@0.28.2)(jiti@2.7.0))
+      '@prisma/orm-framework':
+        specifier: 8.0.0-rc.4
+        version: 8.0.0-rc.4(typescript@5.9.3)
       '@standard-schema/spec':
         specifier: ^1.1.0
         version: 1.1.0
