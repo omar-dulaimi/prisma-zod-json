@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no publish, no tag, no push) - defaults on for safety'
+        type: boolean
+        default: true
 
 concurrency:
   group: release
@@ -54,4 +59,4 @@ jobs:
       - name: Semantic release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm release
+        run: pnpm release ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '-- --dry-run' || '' }}
