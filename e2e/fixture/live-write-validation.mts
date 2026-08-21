@@ -6,7 +6,7 @@
  * path. This does. Exits non-zero on the first broken expectation.
  */
 import 'dotenv/config';
-import postgres from '@prisma-next/postgres/runtime';
+import postgres from '@prisma/orm-postgres/runtime';
 // Registration 3 of 3: the runtime plane. Without it, constructing the client fails with
 // "no contributor registered a codec descriptor for that codecId".
 import { zodJsonRuntimeDescriptor } from 'prisma-next-zod-json/runtime';
