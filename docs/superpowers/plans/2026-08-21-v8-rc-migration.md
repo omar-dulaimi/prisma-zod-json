@@ -135,6 +135,8 @@ Replace `peerDependencies`, `dependencies`, and the `@prisma-next/*` entries in 
 
 ```json
 "dependencies": {
+  "@prisma/orm-family-sql": "8.0.0-rc.4",
+  "@prisma/orm-framework": "8.0.0-rc.4",
   "@standard-schema/spec": "^1.1.0",
   "zod": "^4.1.0"
 },

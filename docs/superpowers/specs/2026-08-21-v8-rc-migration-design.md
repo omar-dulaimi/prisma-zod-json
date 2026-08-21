@@ -172,10 +172,17 @@ validation, and 0.17.0 changed what the bare `Json` scalar means; verify rather 
 "peerDependencies": { "@prisma/orm-target-postgres": "8.0.0-rc.4", "typescript": ">=5.9" },
 "peerDependenciesMeta": { "typescript": { "optional": true } },
 "dependencies": {
+  "@prisma/orm-family-sql": "8.0.0-rc.4",
+  "@prisma/orm-framework": "8.0.0-rc.4",
   "@standard-schema/spec": "^1.1.0",
   "zod": "^4.1.0"
 }
 ```
+
+Note `@prisma/orm-family-sql` and `@prisma/orm-framework` land in `dependencies`, not just as transitive
+reach-through of the peer — this mirrors the reference's own manifest exactly (see Ground truth above)
+and is load-bearing: dropping them (an earlier draft of this section did) makes every import from those
+two packages fail to resolve, caught immediately by `pnpm typecheck`.
 
 `zod` moves from peer to dependency, mirroring `arktype`'s treatment in the reference. `devDependencies`
 gets `@prisma/orm-target-postgres` pinned to exact `8.0.0-rc.4` (matching the reference's own
