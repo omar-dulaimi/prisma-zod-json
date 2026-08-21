@@ -1,3 +1,5 @@
+## [4.0.1](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/compare/v4.0.0...v4.0.1) (2026-08-21)
+
 ## [4.0.0](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/compare/v3.0.0...v4.0.0) (2026-08-21)
 
 ### 🚀 Features

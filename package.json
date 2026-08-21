@@ -1,6 +1,6 @@
 {
   "name": "prisma-orm-extension-zod-json",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Typed JSON columns for Prisma, described and enforced by zod. Implements the zod/json@1 codec.",
   "license": "MIT",
   "type": "module",
