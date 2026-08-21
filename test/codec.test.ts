@@ -97,6 +97,44 @@ describe('decode validates what comes back', () => {
   });
 });
 
+describe('encodeJson / decodeJson round-trip (the lossless JSON path)', () => {
+  test('a value survives encodeJson then decodeJson unchanged', () => {
+    const codec = codecFor(Profile);
+
+    const json = codec.encodeJson({ name: 'Ada', age: 36 });
+    expect(codec.decodeJson(json)).toEqual({ name: 'Ada', age: 36 });
+  });
+
+  test('decodeJson rejects a value the schema forbids', () => {
+    const codec = codecFor(Profile);
+
+    expect(() => codec.decodeJson({ name: 'x', age: 36 })).toThrow(/decode/);
+  });
+
+  test('decodeJson names the offending path', () => {
+    const codec = codecFor(Profile);
+
+    expect(() => codec.decodeJson({ name: 'Ada', age: -1 })).toThrow(/age/);
+  });
+});
+
+describe('encodeJson / decodeJson respect validateOnWrite: false the same way encode/decode do', () => {
+  // Stored as a truthy 'off', not false: the contract emitter drops boolean false.
+  const params = { ...toTypeParams(Profile), writeValidation: 'off' as const };
+
+  test('encodeJson lets an invalid value through when write validation is off', () => {
+    const codec = codecFor(Profile, params);
+
+    expect(codec.encodeJson({ name: 'x', age: -1 } as never)).toEqual({ name: 'x', age: -1 });
+  });
+
+  test('decodeJson still validates, so the data is checked somewhere', () => {
+    const codec = codecFor(Profile, params);
+
+    expect(() => codec.decodeJson({ name: 'x', age: -1 })).toThrow(/decode/);
+  });
+});
+
 describe('the descriptor identifies itself as the codec Prisma specified', () => {
   test('uses the zod/json@1 codec id', () => {
     expect(zodJsonDescriptor.codecId).toBe('zod/json@1');
