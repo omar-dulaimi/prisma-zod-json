@@ -6,25 +6,20 @@
   "type": "module",
   "sideEffects": false,
   "dependencies": {
-    "@standard-schema/spec": "^1.1.0"
-  },
-  "peerDependencies": {
-    "@prisma-next/contract": "^0.16.0",
-    "@prisma-next/contract-authoring": "^0.16.0",
-    "@prisma-next/family-sql": "^0.16.0",
-    "@prisma-next/framework-components": "^0.16.0",
-    "@prisma-next/sql-relational-core": "^0.16.0",
-    "@prisma-next/sql-runtime": "^0.16.0",
+    "@standard-schema/spec": "^1.1.0",
     "zod": "^4.1.0"
   },
+  "peerDependencies": {
+    "@prisma/orm-target-postgres": "8.0.0-rc.4",
+    "typescript": ">=5.9"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
   "devDependencies": {
-    "@prisma-next/contract": "0.16.0",
-    "@prisma-next/contract-authoring": "0.16.0",
-    "@prisma-next/family-sql": "0.16.0",
-    "@prisma-next/framework-components": "0.16.0",
-    "@prisma-next/sql-contract": "0.16.0",
-    "@prisma-next/sql-relational-core": "0.16.0",
-    "@prisma-next/sql-runtime": "0.16.0",
+    "@prisma/orm-target-postgres": "8.0.0-rc.4",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
