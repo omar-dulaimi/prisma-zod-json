@@ -30,7 +30,8 @@ rebuilt into a validator at runtime.
 npm install prisma-next-zod-json zod
 ```
 
-Requires `zod@^4.1` (for `z.fromJSONSchema`) and `prisma-next@0.16`.
+Requires `@prisma/orm-postgres@8.0.0-rc.4` (or another Prisma v8 RC Postgres target). `zod` is bundled
+as a regular dependency, not something you install separately.
 
 ## Registration
 
@@ -43,20 +44,24 @@ control plane to create the table, the runtime plane to read and write it.
 import zodJsonPack from 'prisma-next-zod-json/pack';
 
 export const contract = defineContract({}, ({ field, model }) => ({
-  extensionPacks: { zodJson: zodJsonPack },
+  extensions: { zodJson: zodJsonPack },
   models: { /* … */ },
 }));
 ```
 
-**Control**: in `prisma-next.config.ts`, so `db init` and migrations know the column:
+**Control**: in `prisma.config.ts`, so `db init` and migrations know the column:
 
 ```ts
+import { definePrismaConfig } from '@prisma/cli-engine';
+import { defineConfig as ormConfig } from '@prisma/orm-postgres/config';
 import { zodJsonExtensionDescriptor } from 'prisma-next-zod-json/control';
 
-export default defineConfig({
-  contract: './src/prisma/contract.ts',
-  extensions: [zodJsonExtensionDescriptor],
-  db: { connection: process.env.DATABASE_URL! },
+export default definePrismaConfig({
+  orm: ormConfig({
+    contract: './src/prisma/contract.ts',
+    extensions: [zodJsonExtensionDescriptor],
+    db: { connection: process.env.DATABASE_URL! },
+  }),
 });
 ```
 
@@ -143,4 +148,4 @@ as `unknown`: a wrong type is worse than an honest one.
 
 ## Status
 
-Early. `prisma-next` is 0.16 and still moving; this tracks it.
+Early. Tracks the Prisma v8 release-candidate line (currently `8.0.0-rc.4`); still moving.

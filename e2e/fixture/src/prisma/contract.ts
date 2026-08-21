@@ -1,4 +1,4 @@
-import { defineContract } from '@prisma-next/postgres/contract-builder';
+import { defineContract } from '@prisma/orm-postgres/contract-builder';
 import { zodJson } from 'prisma-next-zod-json/column-types';
 import zodJsonPack from 'prisma-next-zod-json/pack';
 import { z } from 'zod';
@@ -21,8 +21,8 @@ export const contract = defineContract(
   {},
   ({ field, model }) => ({
     // Registration 1 of 3: the contract plane. Belongs in the object this callback returns;
-    // `defineConfig` accepts an `extensionPacks` key and silently ignores it.
-    extensionPacks: {
+    // `defineConfig` accepts an `extensions` key and silently ignores it.
+    extensions: {
       zodJson: zodJsonPack,
     },
     models: {

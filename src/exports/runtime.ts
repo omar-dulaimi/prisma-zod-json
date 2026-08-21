@@ -5,7 +5,7 @@
  * runtime entrypoint so `src/core/**` stays free of runtime-plane imports.
  */
 
-import type { SqlRuntimeExtensionDescriptor } from '@prisma-next/sql-runtime';
+import type { SqlRuntimeExtensionDescriptor } from '@prisma/orm-family-sql/runtime';
 import { zodJsonPackMeta } from '../core/pack-meta.js';
 import { zodJsonCodecRegistry } from '../core/registry.js';
 

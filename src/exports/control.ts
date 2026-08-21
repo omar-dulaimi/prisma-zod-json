@@ -10,7 +10,7 @@
 import type {
   CodecControlHooks,
   SqlControlExtensionDescriptor,
-} from '@prisma-next/family-sql/control';
+} from '@prisma/orm-family-sql/family/control';
 import { ZOD_JSON_CODEC_ID } from '../core/zod-json-codec.js';
 import { zodJsonPackMeta } from '../core/pack-meta.js';
 

@@ -5,18 +5,18 @@
  * type params, and is rebuilt into a validator at runtime. Values are validated on the way in as well
  * as on the way out; see {@link ZodJsonCodecClass.encode}.
  */
-import type { JsonValue } from '@prisma-next/contract/types';
+import type { JsonValue } from '@prisma/orm-framework/contract/types';
+import type { ProjectionExpr } from '@prisma/orm-family-sql/relational-core/ast';
 import {
-  type AnyCodecDescriptor,
   type CodecCallContext,
-  CodecDescriptorImpl,
   CodecImpl,
   type CodecInstanceContext,
   type ColumnHelperFor,
   type ColumnSpec,
   column,
-} from '@prisma-next/framework-components/codec';
-import { runtimeError } from '@prisma-next/framework-components/runtime';
+} from '@prisma/orm-framework/components/codec';
+import { PostgresCodecDescriptor, definePostgresCodecs } from '@prisma/orm-target-postgres/target/codec-descriptor';
+import { runtimeError } from '@prisma/orm-framework/components/runtime';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { z } from 'zod';
 import {
@@ -31,7 +31,6 @@ import { renderOutputType } from './render-output-type.js';
 /** Codec id for zod-backed JSON columns. Library-bound, not target-bound. */
 export const ZOD_JSON_CODEC_ID = 'zod/json@1' as const;
 const ZOD_JSON_NATIVE_TYPE = 'jsonb' as const;
-const ZOD_JSON_META = { db: { sql: { postgres: { nativeType: ZOD_JSON_NATIVE_TYPE } } } } as const;
 
 /**
  * Type params as stored in the contract.
@@ -172,11 +171,19 @@ const paramsSchema = z.looseObject({
   writeValidation: z.literal('off').optional(),
 }) satisfies StandardSchemaV1<ZodJsonParams>;
 
-export class ZodJsonDescriptor extends CodecDescriptorImpl<ZodJsonParams> {
+export class ZodJsonDescriptor extends PostgresCodecDescriptor<ZodJsonParams> {
+  protected override nativeType(): string {
+    return ZOD_JSON_NATIVE_TYPE;
+  }
+
+  /** Both this codec and its arktype counterpart are already JSON-shaped, so projection is identity. */
+  protected override jsonProjection(expression: ProjectionExpr): ProjectionExpr {
+    return expression;
+  }
+
   override readonly codecId = ZOD_JSON_CODEC_ID;
   override readonly traits = ['equality'] as const;
   override readonly targetTypes = [ZOD_JSON_NATIVE_TYPE] as const;
-  override readonly meta = ZOD_JSON_META;
   override readonly paramsSchema: StandardSchemaV1<ZodJsonParams> = paramsSchema;
 
   override renderOutputType(params: ZodJsonParams): string {
@@ -238,4 +245,4 @@ export function zodJson<S extends z.ZodType>(
 zodJson satisfies ColumnHelperFor<ZodJsonDescriptor>;
 
 /** Every codec descriptor this package ships. */
-export const codecDescriptors: readonly AnyCodecDescriptor[] = [zodJsonDescriptor];
+export const codecDescriptors = definePostgresCodecs([zodJsonDescriptor]);
