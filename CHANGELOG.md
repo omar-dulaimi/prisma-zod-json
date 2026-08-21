@@ -1,3 +1,9 @@
+## [4.0.0](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/compare/v3.0.0...v4.0.0) (2026-08-21)
+
+### 🚀 Features
+
+* **breaking:** version this package to track its Prisma dependency ([9cc5008](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/commit/9cc500859f5bd231fa509b7735548901d6e8d288))
+
 ## [3.0.0](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/compare/v2.0.0...v3.0.0) (2026-08-21)
 
 ### 🚀 Features
