@@ -23,6 +23,7 @@
         ]
       }
     ],
+    "./scripts/prisma-version-release-plugin.mjs",
     [
       "@semantic-release/release-notes-generator",
       {
