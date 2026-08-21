@@ -1,3 +1,13 @@
+## [3.0.0](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/compare/v2.0.0...v3.0.0) (2026-08-21)
+
+### 🚀 Features
+
+* **breaking:** rename to prisma-orm-extension-zod-json ([dcc764e](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/commit/dcc764ea896645894f83b8e97c77fb55c8e9073c))
+
+### ♻️ Code Refactoring
+
+* **e2e:** drop the manual as-never casts for postgres<Contract> ([52c4cb1](https://github.com/omar-dulaimi/prisma-orm-extension-zod-json/commit/52c4cb1f00959485c61d4ce849547c5f778ad771))
+
 ## [2.0.0](https://github.com/omar-dulaimi/prisma-zod-json/compare/v1.0.0...v2.0.0) (2026-08-21)
 
 ### 🚀 Features
