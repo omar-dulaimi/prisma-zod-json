@@ -34,8 +34,28 @@ intent; package contents are what actually ships.
 - **The "lossless JSON form" the 0.17.0 notes describe is `encodeJson`/`decodeJson`** on the codec class.
   It is not a new interface: our `ZodJsonCodecClass` already implements both
   (`src/core/zod-json-codec.ts:158-165`), and both already thread `validateOnWrite` the same way
-  `encode`/`decode` do. This significantly de-risks the migration: there is no new logic to write here,
-  only imports to rename and a regression test to lock in that it stays correct.
+  `encode`/`decode` do. The codec class's shape (`CodecImpl<typeof ID, readonly ['equality'], string |
+  JsonValue, TInferred>`, `encode`/`decode`/`encodeJson`/`decodeJson`) is confirmed byte-identical to our
+  current one — no new logic to write there, only the import rename.
+- **The descriptor class's base type changed, and this is real, not mechanical.** Read directly from the
+  reference's compiled output and `.d.mts`: `ArktypeJsonDescriptor` no longer extends the generic
+  `CodecDescriptorImpl<Params>` — it extends `PostgresCodecDescriptor<Params>` from
+  `@prisma/orm-target-postgres/target/codec-descriptor`. Three consequences:
+  - The old `meta = { db: { sql: { postgres: { nativeType: '...' } } } }` object is gone. Native type is
+    now a `protected nativeType(): string` **method**.
+  - A new `protected jsonProjection(expression: ProjectionExpr): ProjectionExpr` method is required
+    (`ProjectionExpr` from `@prisma/orm-family-sql/relational-core/ast`). The reference implements it as
+    a pure passthrough (`return expression`) — both codecs are JSON-native, so there's no reason ours
+    should differ.
+  - `codecId`/`traits`/`targetTypes`/`paramsSchema`/`renderOutputType`/`factory` are unchanged in shape.
+  - The codec **class** (not the descriptor) is unaffected by any of this — `ZodJsonCodecClass` keeps
+    extending `CodecImpl` exactly as today.
+- **`registry.ts`'s array gets one wrapper call.** `definePostgresCodecs([zodJsonDescriptor])` (from the
+  same `@prisma/orm-target-postgres/target/codec-descriptor` import) replaces the current plain
+  `readonly AnyCodecDescriptor[]` array literal, before it's handed to `buildCodecDescriptorRegistry`.
+  Confirmed by reading the reference's `registry.mjs`: same two-step shape, same downstream
+  `Array.from(registry.values())` consumers in `pack-meta`/`control`/`runtime` — nothing past this one
+  line changes.
 - **The contract-plane key really is renamed.** `extensionPacks` → `extensions`, confirmed in
   `@prisma/orm-framework`'s contract types. Control-plane was already spelled `extensions` — only the
   contract-plane key changes.
@@ -75,10 +95,8 @@ intent; package contents are what actually ships.
   | `@prisma-next/framework-components/runtime` | `zod-json-codec.ts:19` | `@prisma/orm-framework/components/runtime` |
   | `@prisma-next/family-sql/control` (type) | `control.ts:13` | `@prisma/orm-family-sql/family/control` (note the extra `/family` segment) |
   | `@prisma-next/sql-runtime` (type) | `runtime.ts:8` | `@prisma/orm-family-sql/runtime` |
-
-  One import in the reference has no current analog in our code: the arktype codec module also imports
-  `@prisma/orm-target-postgres/target/codec-descriptor`, which nothing in our 0.16.0 `zod-json-codec.ts`
-  corresponds to. Flagged as an open item below rather than assumed away.
+  | *(none — new in rc.4)* | `zod-json-codec.ts` (descriptor) | `PostgresCodecDescriptor`, `definePostgresCodecs` from `@prisma/orm-target-postgres/target/codec-descriptor` |
+  | *(none — new in rc.4)* | `zod-json-codec.ts` (`jsonProjection` param/return type) | `ProjectionExpr` (type) from `@prisma/orm-family-sql/relational-core/ast` |
 
 ## Approach
 
@@ -94,6 +112,18 @@ Considered three; going with the first.
 
 Pin exact `8.0.0-rc.4` versions, not a caret or `next` dist-tag: the release notes warn a future respin
 can still remove or rename APIs, and there is no promise rc.4 is the last one before GA.
+
+**rc.4 is not stale — it's current for the packages that matter here.** Checked directly against the
+registry: `8.0.0-rc.4` is the latest non-dev release of every ORM-facing package this migration touches
+(`orm-target-postgres`, `orm-family-sql`, `orm-framework`, `orm-postgres`, `orm-toolchain`, and the
+reference `orm-extension-arktype-json`) — nothing has shipped past it for any of them, only unpublished
+`rc.4-dev.*` builds. The bare `prisma` CLI package has kept moving independently (`next` resolves to
+`8.0.0-rc.7` as of this writing) — but `prisma@8.0.0-rc.7` itself still depends on
+`@prisma/orm-toolchain@8.0.0-rc.4`. So the CLI binary version and the ORM package versions are not the
+same number, and that's expected, not a mismatch: pin the ORM-facing packages to exact `8.0.0-rc.4`, and
+pin the `prisma` CLI dependency (in the e2e fixture and example app only — the library itself has no CLI
+dependency) to whatever exact version `next` resolves to at implementation time, re-checked rather than
+assumed to still be rc.7.
 
 ## Scope
 
@@ -116,17 +146,19 @@ line in the example app). Pack shape itself
 
 - Import rename per the table above (`control.ts:13`).
 - Config file: `prisma-next.config.ts` (flat `defineConfig` from `@prisma-next/postgres/config`) →
-  `prisma.config.ts` using `definePrismaConfig({ orm: ormConfig({...}) })`, importing
-  `definePrismaConfig` from `@prisma/cli-engine` and the postgres-specific `defineConfig` (aliased
-  `ormConfig`) from whatever subpath `@prisma/orm-target-postgres` exposes for config (mirrors the old
-  `@prisma-next/postgres/config` pattern; confirm the exact rc.4 subpath the same way the table above was
-  built — the reference extension doesn't need this since it isn't itself an app, so this one needs its
-  own lookup against `@prisma/orm-target-postgres`'s export map). Applies to both
-  `e2e/fixture/prisma-next.config.ts` and the example app's root config.
+  `prisma.config.ts` using `definePrismaConfig({ orm: ormConfig({...}) })`. `definePrismaConfig` comes
+  from `@prisma/cli-engine`. The postgres-specific `defineConfig` (aliased `ormConfig`) comes from
+  **`@prisma/orm-postgres/config`** — confirmed by direct export-map lookup. Note this is the
+  *consumer-facing* facade package, not `@prisma/orm-target-postgres` (which has no `/config` export at
+  all — config authoring is an app concern, not an extension-author concern, so it lives on the facade a
+  consumer installs). Applies to both `e2e/fixture/prisma-next.config.ts` and the example app's root
+  config.
 
-**Runtime plane.** Import rename per the table above (`runtime.ts:8`). `zod-json-codec.ts`'s
-`encodeJson`/`decodeJson` (confirmed already correct, see Ground truth) get a regression test, not new
-logic.
+**Runtime plane.** Import rename per the table above (`runtime.ts:8`), plus the descriptor base-class
+change described in Ground truth (`PostgresCodecDescriptor`, `nativeType()`, `jsonProjection()`,
+`definePostgresCodecs`). `zod-json-codec.ts`'s `encodeJson`/`decodeJson` (confirmed already correct, see
+Ground truth) get a regression test, not new logic — the descriptor reshaping is real but mechanical:
+every new method's implementation is fully determined by the reference, nothing is a judgment call.
 
 **Native type.** Keep `nativeType: 'jsonb'` (confirmed unchanged). Add an e2e assertion that the physical
 Postgres column type really is `jsonb` post-migration — this package's whole purpose is jsonb-backed
@@ -159,9 +191,16 @@ need — see CLI/CI below.
 "db:init": "prisma-next db init"
 ```
 
-Move to the unified `prisma` CLI's equivalents (confirm exact subcommand spelling during implementation;
-the release notes' own before/after examples suggest the subcommand names carry over unchanged, only the
-binary name changes). `e2e/fixture/package.json`'s nine separate `@prisma-next/*` dependencies also
+Move to the unified `prisma` CLI's equivalents — confirmed by installing `prisma@next` (resolves to
+`8.0.0-rc.7`) in a scratch dir and running `--help`: `contract emit` and `db init` are real subcommands
+under the `contract` and `db` command groups, spelled identically to today. Only the binary changes:
+
+```json
+"emit": "prisma contract emit",
+"db:init": "prisma db init"
+```
+
+`e2e/fixture/package.json`'s nine separate `@prisma-next/*` dependencies also
 collapse — per 0.17.0, "an application depends on exactly one database facade" (`@prisma/orm-postgres`
 for a consumer, not the extension-author-only `@prisma/orm-target-postgres`) plus whatever extension
 packs it uses; the fixture is an application, so it gets the bigger simplification. Same treatment for
@@ -198,23 +237,24 @@ against the newly *published* version, same pattern as the original 0.16.0 build
 
 ## Open items for the implementation plan
 
-Small and bounded; none of them block writing the plan itself:
+None remaining. All three items flagged in the first draft of this spec were resolved by going one level
+deeper than package-level lookups — reading the reference extension's actual compiled output and typed
+declarations, and installing the real CLI:
 
-- Exact `@prisma/orm-target-postgres` subpath for the postgres-specific config builder (the `ormConfig`
-  half of `definePrismaConfig({ orm: ormConfig({...}) })`) — same kind of lookup as the import table
-  above, just against a different package.
-- What `@prisma/orm-target-postgres/target/codec-descriptor` is, and whether our codec needs it too or
-  it's arktype-specific.
-- Exact unified-CLI subcommand spelling for `contract emit` / `db init`.
+- The config builder is `@prisma/orm-postgres/config`, not a `@prisma/orm-target-postgres` subpath (see
+  Control plane above).
+- `@prisma/orm-target-postgres/target/codec-descriptor` is required, not arktype-specific: it's where
+  `PostgresCodecDescriptor` and `definePostgresCodecs` live, and every Postgres codec extends the former
+  now (see Ground truth above).
+- `contract emit` / `db init` are confirmed real subcommands on the installed `prisma@8.0.0-rc.7` binary.
 
 ## Risks
 
-- **Another respin before GA.** The release notes explicitly don't promise rc.4 is the last one.
-  Mitigation: exact-pinned versions (not ranges), and the fact that the codec-authoring interface has
-  already proven stable across four RCs plus 0.17.0 is a real, if not absolute, signal it's settling.
-- **The one unmapped import** (`@prisma/orm-target-postgres/target/codec-descriptor`). If it turns out to
-  be required and not arktype-specific, it's a small addition, not a redesign — the codec class already
-  has everything else it needs.
+- **Another respin before GA.** The release notes explicitly don't promise rc.4 is the last one, and the
+  bare `prisma` CLI package has already moved to rc.7 while the ORM-facing packages held at rc.4 — proof
+  the two lines don't move in lockstep. Mitigation: exact-pinned versions everywhere (not ranges), and
+  the fact that every ORM-facing package's interface has already proven stable across four RCs plus
+  0.17.0 is a real, if not absolute, signal it's settling.
 - **The e2e job needs real infrastructure** (Postgres plus a real rc.4 install) to prove any of this
   actually works, not just typechecks. Already true today of the existing e2e job; nothing new, just
   re-pointed at a different dependency set.
