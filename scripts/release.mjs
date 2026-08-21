@@ -98,7 +98,10 @@ async function main() {
   writeFileSync(pkgPath, `${JSON.stringify({ ...pkg, version }, null, 2)}\n`);
   console.log(`Wrote version ${version} to package.json (workspace only, never committed).`);
 
-  execFileSync('npm', ['publish'], { cwd: repo, stdio: 'inherit' });
+  // --tag latest is explicit because npm refuses to publish a prerelease version (which every
+  // 8.0.0-rc.N is) without one. latest is correct for this package's single release channel: each
+  // release supersedes the last, RC or not, and semver keeps them ordered.
+  execFileSync('npm', ['publish', '--tag', 'latest'], { cwd: repo, stdio: 'inherit' });
   console.log(`Published ${pkg.name}@${version}.`);
 
   const tag = `v${version}`;
