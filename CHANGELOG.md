@@ -1,3 +1,9 @@
+## [2.0.0](https://github.com/omar-dulaimi/prisma-zod-json/compare/v1.0.0...v2.0.0) (2026-08-21)
+
+### 🚀 Features
+
+* **breaking:** rename the package from prisma-next-zod-json to prisma-zod-json ([925d05c](https://github.com/omar-dulaimi/prisma-zod-json/commit/925d05c0c85b856dad10711f17d8f2b7c171b3b8))
+
 ## [1.0.0](https://github.com/omar-dulaimi/prisma-next-zod-json/compare/v0.1.1...v1.0.0) (2026-08-21)
 
 ### 🚀 Features
