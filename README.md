@@ -152,4 +152,9 @@ as `unknown`: a wrong type is worse than an honest one.
 
 ## Status
 
-Early. Tracks the Prisma v8 release-candidate line (currently `8.0.0-rc.4`); still moving.
+Early. Tracks the Prisma v8 release-candidate line; still moving.
+
+Versions mirror the Prisma release this package targets, the same convention Prisma's own extensions
+use: installing `prisma-orm-extension-zod-json@8.0.0-rc.4` gets you the build for Prisma `8.0.0-rc.4`.
+A fix released between Prisma versions appends a counter (`8.0.0-rc.4.1`), which semver orders after
+its base and before the next Prisma release.
