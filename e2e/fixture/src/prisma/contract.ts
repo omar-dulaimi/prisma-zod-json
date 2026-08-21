@@ -1,6 +1,6 @@
 import { defineContract } from '@prisma/orm-postgres/contract-builder';
-import { zodJson } from 'prisma-next-zod-json/column-types';
-import zodJsonPack from 'prisma-next-zod-json/pack';
+import { zodJson } from 'prisma-zod-json/column-types';
+import zodJsonPack from 'prisma-zod-json/pack';
 import { z } from 'zod';
 
 /**

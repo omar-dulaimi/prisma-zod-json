@@ -1,7 +1,7 @@
 {
   "branches": ["main"],
   "//": "Set explicitly: package.json uses npm's `git+https://` form, which @semantic-release/github parses into an empty $owner.",
-  "repositoryUrl": "https://github.com/omar-dulaimi/prisma-next-zod-json.git",
+  "repositoryUrl": "https://github.com/omar-dulaimi/prisma-zod-json.git",
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
@@ -56,7 +56,7 @@
     [
       "@semantic-release/github",
       {
-        "successComment": "🎉 Released in [v${nextRelease.version}](https://www.npmjs.com/package/prisma-next-zod-json/v/${nextRelease.version}).",
+        "successComment": "🎉 Released in [v${nextRelease.version}](https://www.npmjs.com/package/prisma-zod-json/v/${nextRelease.version}).",
         "//": "No failure issue: the workflow run already reports it, and the fail step's own GraphQL call was erroring and masking the real cause.",
         "failComment": false,
         "failTitle": false,

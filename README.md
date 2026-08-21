@@ -1,9 +1,9 @@
-# prisma-next-zod-json
+# prisma-zod-json
 
-[![CI](https://github.com/omar-dulaimi/prisma-next-zod-json/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-dulaimi/prisma-next-zod-json/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/prisma-next-zod-json.svg)](https://www.npmjs.com/package/prisma-next-zod-json)
+[![CI](https://github.com/omar-dulaimi/prisma-zod-json/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-dulaimi/prisma-zod-json/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/prisma-zod-json.svg)](https://www.npmjs.com/package/prisma-zod-json)
 
-Typed JSON columns for [Prisma Next](https://github.com/prisma/prisma-next), described and enforced by
+Typed JSON columns for [Prisma](https://github.com/prisma/prisma), described and enforced by
 [zod](https://zod.dev). Implements the `zod/json@1` codec.
 
 ```ts
@@ -27,7 +27,7 @@ rebuilt into a validator at runtime.
 ## Install
 
 ```sh
-npm install prisma-next-zod-json zod
+npm install prisma-zod-json zod
 ```
 
 Requires `@prisma/orm-postgres@8.0.0-rc.4` (or another Prisma v8 RC Postgres target). `zod` is bundled
@@ -41,7 +41,7 @@ control plane to create the table, the runtime plane to read and write it.
 **Contract**: in the object your `defineContract` callback returns, next to `models`:
 
 ```ts
-import zodJsonPack from 'prisma-next-zod-json/pack';
+import zodJsonPack from 'prisma-zod-json/pack';
 
 export const contract = defineContract({}, ({ field, model }) => ({
   extensions: { zodJson: zodJsonPack },
@@ -54,7 +54,7 @@ export const contract = defineContract({}, ({ field, model }) => ({
 ```ts
 import { definePrismaConfig } from '@prisma/cli-engine';
 import { defineConfig as ormConfig } from '@prisma/orm-postgres/config';
-import { zodJsonExtensionDescriptor } from 'prisma-next-zod-json/control';
+import { zodJsonExtensionDescriptor } from 'prisma-zod-json/control';
 
 export default definePrismaConfig({
   orm: ormConfig({
@@ -68,7 +68,7 @@ export default definePrismaConfig({
 **Runtime**: where you construct the client:
 
 ```ts
-import { zodJsonRuntimeDescriptor } from 'prisma-next-zod-json/runtime';
+import { zodJsonRuntimeDescriptor } from 'prisma-zod-json/runtime';
 
 export const db = postgres({ contractJson, url, extensions: [zodJsonRuntimeDescriptor] });
 ```
