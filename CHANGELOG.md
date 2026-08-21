@@ -1,3 +1,17 @@
+## [1.0.0](https://github.com/omar-dulaimi/prisma-next-zod-json/compare/v0.1.1...v1.0.0) (2026-08-21)
+
+### 🚀 Features
+
+* **breaking:** migrate the codec to the rc.4 descriptor shape ([e5b1457](https://github.com/omar-dulaimi/prisma-next-zod-json/commit/e5b14579ddd8b3e94a3af32f481afc53753e13e9))
+
+### 📚 Documentation
+
+* add v8 rc.4 migration design spec ([3e658e0](https://github.com/omar-dulaimi/prisma-next-zod-json/commit/3e658e013a3f76e008ac151e4dab737fb0dc945f))
+* add v8 rc.4 migration implementation plan ([7b9b154](https://github.com/omar-dulaimi/prisma-next-zod-json/commit/7b9b1543682843748df95d460705c4dfe5679e2d))
+* correct v8 migration spec after deeper verification ([9d57980](https://github.com/omar-dulaimi/prisma-next-zod-json/commit/9d57980985b151243055f8758e26f202073f9d14))
+* fix dependency block in spec and plan (missing two packages) ([2127caf](https://github.com/omar-dulaimi/prisma-next-zod-json/commit/2127caf90f20c95a326208bb29ae09b6b4812619))
+* update registration examples for the rc.4 config shape ([f35a85e](https://github.com/omar-dulaimi/prisma-next-zod-json/commit/f35a85ed384f14bfea6c8923e9c08a285b098610))
+
 ## [0.1.1](https://github.com/omar-dulaimi/prisma-next-zod-json/compare/v0.1.0...v0.1.1) (2026-07-27)
 
 ### 🐛 Bug Fixes
