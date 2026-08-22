@@ -27,6 +27,7 @@ import {
   type ZodJsonTypeParams,
 } from './serialize.js';
 import { renderOutputType } from './render-output-type.js';
+import { typedJsonDescriptor } from './typed-json-codec.js';
 
 /** Codec id for zod-backed JSON columns. Library-bound, not target-bound. */
 export const ZOD_JSON_CODEC_ID = 'zod/json@1' as const;
@@ -245,4 +246,4 @@ export function zodJson<S extends z.ZodType>(
 zodJson satisfies ColumnHelperFor<ZodJsonDescriptor>;
 
 /** Every codec descriptor this package ships. */
-export const codecDescriptors = definePostgresCodecs([zodJsonDescriptor]);
+export const codecDescriptors = definePostgresCodecs([zodJsonDescriptor, typedJsonDescriptor]);

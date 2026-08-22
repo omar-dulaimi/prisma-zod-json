@@ -1,0 +1,10 @@
+// SPIKE seam four: a PSL-only author, no TypeScript contract builder, no validator library.
+types {
+  Prefs = typedJson.Of("PrismaJson.Prefs")
+}
+
+model Account {
+  id    String @id @default(uuid())
+  email String @unique
+  prefs Prefs
+}

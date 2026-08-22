@@ -1,0 +1,1 @@
+{"extends":"../tsconfig.json","include":["contract.d.ts","prisma-json.d.ts","spike-psl-roundtrip.mts"]}

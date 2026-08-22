@@ -16,4 +16,10 @@ export type CodecTypes = {
     readonly output: unknown;
     readonly traits: 'equality';
   };
+  // SPIKE
+  readonly 'typed/json@1': {
+    readonly input: unknown;
+    readonly output: unknown;
+    readonly traits: 'equality';
+  };
 };

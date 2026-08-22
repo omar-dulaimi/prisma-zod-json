@@ -12,6 +12,7 @@ import type {
   SqlControlExtensionDescriptor,
 } from '@prisma/orm-family-sql/family/control';
 import { ZOD_JSON_CODEC_ID } from '../core/zod-json-codec.js';
+import { TYPED_JSON_CODEC_ID } from '../core/typed-json-codec.js';
 import { zodJsonPackMeta } from '../core/pack-meta.js';
 
 const zodJsonControlPlaneHooks: CodecControlHooks = {
@@ -26,6 +27,7 @@ export const zodJsonExtensionDescriptor: SqlControlExtensionDescriptor<'postgres
       ...zodJsonPackMeta.types.codecTypes,
       controlPlaneHooks: {
         [ZOD_JSON_CODEC_ID]: zodJsonControlPlaneHooks,
+        [TYPED_JSON_CODEC_ID]: zodJsonControlPlaneHooks,
       },
     },
   },

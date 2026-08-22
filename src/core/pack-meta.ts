@@ -8,6 +8,7 @@
 
 import type { CodecTypes } from '../types/codec-types.js';
 import { ZOD_JSON_CODEC_ID } from './zod-json-codec.js';
+import { TYPED_JSON_CODEC_ID } from './typed-json-codec.js';
 import { zodJsonCodecRegistry } from './registry.js';
 
 const zodJsonPackMetaBase = {
@@ -17,6 +18,22 @@ const zodJsonPackMetaBase = {
   targetId: 'postgres',
   version: '0.1.0',
   capabilities: {},
+  // SPIKE: PSL door. `types { Prefs = typedJson.Of("PrismaJson.Prefs") }` -> typed/json@1 with typeRef.
+  authoring: {
+    type: {
+      typedJson: {
+        Of: {
+          kind: 'typeConstructor' as const,
+          args: [{ kind: 'string' as const, name: 'typeRef' }],
+          output: {
+            codecId: TYPED_JSON_CODEC_ID,
+            nativeType: 'jsonb',
+            typeParams: { typeRef: { kind: 'arg' as const, index: 0 } },
+          },
+        },
+      },
+    },
+  },
   types: {
     codecTypes: {
       codecDescriptors: Array.from(zodJsonCodecRegistry.values()),
@@ -29,6 +46,12 @@ const zodJsonPackMetaBase = {
     storage: [
       {
         typeId: ZOD_JSON_CODEC_ID,
+        familyId: 'sql' as const,
+        targetId: 'postgres' as const,
+        nativeType: 'jsonb',
+      },
+      {
+        typeId: TYPED_JSON_CODEC_ID,
         familyId: 'sql' as const,
         targetId: 'postgres' as const,
         nativeType: 'jsonb',
