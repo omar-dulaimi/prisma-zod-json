@@ -42,7 +42,7 @@ npm install prisma-orm-extension-zod-json
 ```
 
 `zod` ships as a regular dependency of this package. Your application needs
-`@prisma/orm-postgres@8.0.0-rc.4`; this package's version always matches the Prisma release it targets
+`@prisma/orm-postgres@8.0.0-rc.5`; this package's version always matches the Prisma release it targets
 (see Versioning below), so keep the two aligned.
 
 ## 2. Register it in the config
@@ -189,8 +189,8 @@ as `unknown`: a wrong type is worse than an honest one.
 ## Versioning and status
 
 Versions mirror the Prisma release this package targets, the same convention Prisma's own extensions
-use: installing `prisma-orm-extension-zod-json@8.0.0-rc.4` gets you the build for Prisma `8.0.0-rc.4`.
-A fix released between Prisma versions appends a counter (`8.0.0-rc.4.1`), which semver orders after
+use: installing `prisma-orm-extension-zod-json@8.0.0-rc.5` gets you the build for Prisma `8.0.0-rc.5`.
+A fix released between Prisma versions appends a counter (`8.0.0-rc.5.1`), which semver orders after
 its base and before the next Prisma release.
 
 Early; tracks the Prisma v8 release-candidate line, which is still moving.
